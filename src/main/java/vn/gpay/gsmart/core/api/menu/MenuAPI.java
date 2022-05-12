@@ -190,35 +190,35 @@ public class MenuAPI {
 	}
 	
 	@RequestMapping(value = "/menu_mobile",method = RequestMethod.POST)
-	public ResponseEntity<?> MenuMobile(HttpServletRequest request ) {
+	public ResponseEntity<?> MewnuMobile(HttpServletRequest request) {
 		try {
 			MenuResponse response = new MenuResponse();
 			GpayUser user = (GpayUser)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			List<Menu> menu = menuService.findByUserid(user.getId());
+			List<Menu> allMenu = menuService.findByUserid(user.getId());
 			
-			List<Menu> result = new ArrayList<Menu>();
+			List<Menu> result = new ArrayList<>();
 			
-			for(Menu item : menu) {
+			for(Menu menu : allMenu) {
 				// bỏ trang chủ
-				if(item.getId().equals("dashboard")) {
+				if(menu.getId().equals("dashboard")) {
 					continue;
 				}
 				// thêm nếu ko có con
-				if(item.getParent_id() == null || item.getParent_id().equals("")) {
-					List<Menu> list = menuService.getby_parentid(item.getId());
-					if(list.size() == 0) {
-						result.add(item);
+				if(menu.getParent_id() == null || menu.getParent_id().equals("")) {
+					List<Menu> listChildMenu = menuService.getby_parentid(menu.getId());
+					if(listChildMenu.size() == 0) {
+						result.add(menu);
 					}
 				}
 				// thêm nếu có cha
 				else {
-					result.add(item);
+					result.add(menu);
 				}
 			}
-			
+
 			response.data = result;
 			
-			return new ResponseEntity<MenuResponse>(response,HttpStatus.OK);
+			return new ResponseEntity<>(response,HttpStatus.OK);
 		}catch (RuntimeException e) {
 			ResponseError errorBase = new ResponseError();
 			errorBase.setErrorcode(ResponseError.ERRCODE_RUNTIME_EXCEPTION);
