@@ -37,12 +37,14 @@ public interface IPersonnel_Service extends Operations<Personel> {
 
 	//lay person theo ten
 	public Personel getPersonelByname(String personnel_name);
-	
+
 	public List<Personel> getTongLaoDongByDate(Long orgmanagerid_link, Date dateBegin, Date dateEnd);
-	
+
 	public List<Personel> getTongLaoDongNghiByDate(Long orgmanagerid_link, Date dateBegin, Date dateEnd);
-	
+
 	List<Personel> getPersonnelByListId(List<Long> personnelIdList);
-	
+
 	List<Personel> getPersonelByCodeAndOrgManager(String personnel_code, Long orgmanagerid_link);
+
+	List<Personel> findByOrgmanagerid_link(Long orgmanagerid_link);
 }

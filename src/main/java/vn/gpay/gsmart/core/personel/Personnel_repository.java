@@ -19,7 +19,7 @@ public interface Personnel_repository extends JpaRepository<Personel, Long>, Jpa
 	@Query("SELECT c FROM Personel c " + "where c.register_code = :register_code "
 			+ "and c.orgrootid_link = :orgrootid_link")
 	public List<Personel> getby_registercode(@Param("register_code") final String register_code,
-			@Param("orgrootid_link") final Long orgrootid_link);
+											 @Param("orgrootid_link") final Long orgrootid_link);
 
 	@Query("SELECT c FROM Personel c "
 			+ "where (c.orgid_link = :orgid_link or orgmanagerid_link = :orgid_link) and status = 0")
@@ -29,20 +29,20 @@ public interface Personnel_repository extends JpaRepository<Personel, Long>, Jpa
 			+ "where (c.orgid_link = :orgid_link or orgmanagerid_link = :orgid_link) "
 			+ "and (personnel_typeid_link = :personnel_typeid_link or :personnel_typeid_link is null) and status = 0")
 	public int getSizePersonnelbyOrgAndType(@Param("orgid_link") final Long orgid_link,
-			@Param("personnel_typeid_link") final Long personnel_typeid_link);
+											@Param("personnel_typeid_link") final Long personnel_typeid_link);
 
 	@Query("SELECT c FROM Personel c " + "inner join TimeSheetLunch b on c.id = b.personnelid_link "
 			+ "where c.orgid_link = :orgid_link " + "and b.shifttypeid_link = :shifttypeid_link "
 			+ "and b.workingdate = :workingdate " + "and b.isworking = true ")
 	public List<Personel> getForPProcessingProductivity(@Param("orgid_link") final Long orgid_link,
-			@Param("shifttypeid_link") final Integer shifttypeid_link, @Param("workingdate") final Date workingdate);
+														@Param("shifttypeid_link") final Integer shifttypeid_link, @Param("workingdate") final Date workingdate);
 
 	@Query("SELECT c FROM Personel c " + "inner join Org a on c.orgid_link = a.id "
 			+ "where a.parentid_link in :orgid_link " + "and c.orgrootid_link = :orgrootid_link "
 			+ "and (:ishas_bikenumber = false or (bike_number is not null and bike_number != ''))")
 	public List<Personel> getperson_and_bikenumber(@Param("orgid_link") final List<Long> orgid_link,
-			@Param("ishas_bikenumber") final Boolean ishas_bikenumber,
-			@Param("orgrootid_link") final Long orgrootid_link);
+												   @Param("ishas_bikenumber") final Boolean ishas_bikenumber,
+												   @Param("orgrootid_link") final Long orgrootid_link);
 
 	@Query("SELECT c FROM Personel c " + "where bike_number = :bike_number")
 	public List<Personel> getby_bikenumber(@Param("bike_number") final String bike_number);
@@ -54,81 +54,85 @@ public interface Personnel_repository extends JpaRepository<Personel, Long>, Jpa
 	// lấy personel theo code và đơn vị
 	@Query("select c from Personel c where c.code = :personnel_code and c.orgmanagerid_link = :orgmanagerid_link ")
 	public Personel getPersonelBycode_orgmanageid_link(@Param("personnel_code") final String personnel_code,
-			@Param("orgmanagerid_link") final Long orgmanagerid_link);
-	
+													   @Param("orgmanagerid_link") final Long orgmanagerid_link);
+
 	// lấy personel theo code và đơn vị
-		@Query("select distinct c from Personel c " 
-				+ " where c.code = :personnel_code " 
-				+ " and (c.orgmanagerid_link = :orgmanagerid_link or :orgmanagerid_link is null) "
-				)
-		public List<Personel> getPersonelByCodeAndOrgManager(
-				@Param("personnel_code") final String personnel_code,
-				@Param("orgmanagerid_link") final Long orgmanagerid_link);
+	@Query("select distinct c from Personel c "
+			+ " where c.code = :personnel_code "
+			+ " and (c.orgmanagerid_link = :orgmanagerid_link or :orgmanagerid_link is null) "
+	)
+	public List<Personel> getPersonelByCodeAndOrgManager(
+			@Param("personnel_code") final String personnel_code,
+			@Param("orgmanagerid_link") final Long orgmanagerid_link);
 
 	// lấy nhân viên theo tên
 	@Query("select c from Personel c where c.fullname = :personnel_name")
 	public Personel getPersonelByname(@Param("personnel_name") final String personnel_name);
 
 	// lấy danh sách nhân viên theo mã nhân viên, không chứa id truyền vào
-	@Query(value = "select c from Personel c " 
-			+ " where c.code = :code " 
+	@Query(value = "select c from Personel c "
+			+ " where c.code = :code "
 			+ " and c.id != :id "
 //			+ " and :id = :id "
 			+ " and c.orgmanagerid_link = :orgmanagerid_link "
 //			+ " and :orgmanagerid_link = :orgmanagerid_link "
 
-			)
+	)
 	public List<Personel> getPersonelByCode_Id_Orgmanagerid_link_Personel(
 			@Param("code") final String code,
-			@Param("id") final Long id, 
+			@Param("id") final Long id,
 			@Param("orgmanagerid_link") final Long orgmanagerid_link);
-	
+
 	// lấy danh sách nhân viên theo mã nhân viên, không chứa id truyền vào
-		@Query(value = "select c from Personel c where c.code = :code " + " and c.id <> :id"
-				+ " and c.orgmanagerid_link = :orgmanagerid_link")
-		public List<Personel> getPersonelByCode_Id_Orgmanagerid_link_Personel_stillWorking(@Param("code") final String code,
-				@Param("id") final Long id, @Param("orgmanagerid_link") final Long orgmanagerid_link);
+	@Query(value = "select c from Personel c where c.code = :code " + " and c.id <> :id"
+			+ " and c.orgmanagerid_link = :orgmanagerid_link")
+	public List<Personel> getPersonelByCode_Id_Orgmanagerid_link_Personel_stillWorking(@Param("code") final String code,
+																					   @Param("id") final Long id, @Param("orgmanagerid_link") final Long orgmanagerid_link);
 
 	// lấy danh sách nhân viên theo tổ , loại nhân viên
 	@Query(value = "select c from Personel c where c.orgid_link = :org_id and (c.personnel_typeid_link = :personnel_typeid_link or :personnel_typeid_link is null or :personnel_typeid_link = 0) ")
 	public List<Personel> getPersonelByOrgid_link(@Param("org_id") final Long id,
-			@Param("personnel_typeid_link") final Long personnel_typeid_link);
+												  @Param("personnel_typeid_link") final Long personnel_typeid_link);
 
 	// lấy danh sách nhân viên theo đơn vị, loại nhân viên, trạng thái đi làm
 	@Query(value = "select c from Personel c where (c.orgid_link = :orgmanagerid_link or orgmanagerid_link = :orgmanagerid_link ) "
 			+ "and ( c.personnel_typeid_link = :personnel_typeid_link or :personnel_typeid_link is null or :personnel_typeid_link = 0) "
 			+ " and (c.status = :status or :status is null or :status = 3)")
 	public List<Personel> getPersonelByOrgid_link_PersonelType(@Param("orgmanagerid_link") final Long orgmanagerid_link,
-			@Param("personnel_typeid_link") final Long personnel_typeid_link, @Param("status") final Integer status);
-	
-	@Query(value = "select c from Personel c " 
+															   @Param("personnel_typeid_link") final Long personnel_typeid_link, @Param("status") final Integer status);
+
+	@Query(value = "select c from Personel c "
 			+ " where (c.orgid_link = :orgmanagerid_link or orgmanagerid_link = :orgmanagerid_link ) "
 			+ " and c.date_startworking <= :dateBegin "
 			+ " and (c.date_endworking >= :dateEnd or c.date_endworking is null) "
-			)
+	)
 	public List<Personel> getTongLaoDongByDate(
 			@Param("orgmanagerid_link") final Long orgmanagerid_link,
-			@Param("dateBegin") final Date dateBegin, 
+			@Param("dateBegin") final Date dateBegin,
 			@Param("dateEnd") final Date dateEnd);
-	
-	@Query(value = "select distinct c from Personel c " 
+
+	@Query(value = "select distinct c from Personel c "
 			+ " inner join TimesheetAbsence b on c.id = b.personnelid_link "
-			+ " where (c.orgid_link = :orgmanagerid_link or orgmanagerid_link = :orgmanagerid_link ) "
+			+ " where (c.orgid_link = :orgmanagerid_link or c.orgmanagerid_link = :orgmanagerid_link ) "
 			+ " and c.date_startworking <= :dateBegin "
 			+ " and (c.date_endworking >= :dateEnd or c.date_endworking is null) "
 			+ " and b.absencedate_from <= :dateEnd "
 			+ " and b.absencedate_to >= :dateBegin "
-			)
+	)
 	public List<Personel> getTongLaoDongNghiByDate(
 			@Param("orgmanagerid_link") final Long orgmanagerid_link,
-			@Param("dateBegin") final Date dateBegin, 
+			@Param("dateBegin") final Date dateBegin,
 			@Param("dateEnd") final Date dateEnd);
-	
-	@Query(value = "select c from Personel c " 
+
+	@Query(value = "select c from Personel c "
 			+ " where c.id in :personnelIdList "
-			)
+	)
 	public List<Personel> getPersonnelByListId(
 			@Param("personnelIdList") final List<Long> personnelIdList
-			);
+	);
 
+	@Query(value = "select c from Personel c"
+			+ " where (c.orgmanagerid_link = :orgmanagerid_link ) "
+	)
+	List<Personel> findByOrgmanagerid_link(@Param("orgmanagerid_link")Long orgmanagerid_link);
 }

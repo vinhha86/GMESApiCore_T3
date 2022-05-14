@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -71,10 +72,13 @@ import vn.gpay.gsmart.core.pcontractproductbom.IPContractProductBomService;
 import vn.gpay.gsmart.core.pcontractproductbom.PContractProductBom;
 import vn.gpay.gsmart.core.pcontractproductbom.PContractProductBom2;
 import vn.gpay.gsmart.core.pcontractproductsku.IPContractProductSKUService;
+import vn.gpay.gsmart.core.personel.IPersonnel_Service;
+import vn.gpay.gsmart.core.personel.Personel;
 import vn.gpay.gsmart.core.product.IProductService;
 import vn.gpay.gsmart.core.product.Product;
 import vn.gpay.gsmart.core.productpairing.IProductPairingService;
 import vn.gpay.gsmart.core.productpairing.ProductPairing;
+import vn.gpay.gsmart.core.reports.NhanSu_Excel;
 import vn.gpay.gsmart.core.security.GpayUser;
 import vn.gpay.gsmart.core.utils.AtributeFixValues;
 import vn.gpay.gsmart.core.utils.ColumnTempBom;
@@ -87,6 +91,8 @@ import vn.gpay.gsmart.core.utils.ResponseMessage;
 @RestController
 @RequestMapping("/api/v1/report")
 public class ReportAPI {
+	@Autowired
+	ServletContext context;
 	@Autowired
 	PContractProductService pcontractproductService;
 	@Autowired
@@ -119,10 +125,42 @@ public class ReportAPI {
 	IPContractBOM2SKUService bomskuService;
 	@Autowired
 	IPContractBOMSKUService bomskuHaiQuanService;
+	@Autowired
+	IPersonnel_Service personnelService;
 
+	@RequestMapping(value = "/NhanSu_Excel", method = RequestMethod.POST)
+	public ResponseEntity<NhanSu_Excel_response> downloadBaoCaoNS(@RequestBody NhanSu_Excel_request request,
+																  HttpServletRequest servletRequest) {
+		NhanSu_Excel_response response = new NhanSu_Excel_response();
+		try {
+			String folderPath = "report/Template";
+
+			// Thư mục gốc upload file.
+			String uploadRootPath = servletRequest.getServletContext().getRealPath(folderPath);
+			File uploadFolder = new File(folderPath);
+			if (!uploadFolder.exists()) {
+				boolean created = uploadFolder.mkdirs();
+			}
+
+			Long orgmanagerid_link = request.orgmanagerid_link;
+			List<Personel> persons = personnelService.findByOrgmanagerid_link(orgmanagerid_link);
+			File excelFile = NhanSu_Excel.createBaoCaoNhanSu(uploadRootPath, persons);
+			InputStream dataInputStream = new FileInputStream(excelFile);
+
+			response.setData(IOUtils.toByteArray(dataInputStream));
+			dataInputStream.close();
+			response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
+			response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
+			return new ResponseEntity<NhanSu_Excel_response>(response, HttpStatus.OK);
+		} catch (Exception exception) {
+			response.setRespcode(ResponseMessage.KEY_RC_APPROVE_FAIL);
+			response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_APPROVE_FAIL));
+			return ResponseEntity.badRequest().body(response);
+		}
+	}
 	@RequestMapping(value = "/quatation", method = RequestMethod.POST)
 	public ResponseEntity<report_quotation_response> Quotation(HttpServletRequest request,
-			@RequestBody report_quotation_request entity) throws IOException {
+															   @RequestBody report_quotation_request entity) throws IOException {
 		report_quotation_response response = new report_quotation_response();
 		GpayUser user = (GpayUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		long orgrootid_link = user.getRootorgid_link();
@@ -381,7 +419,7 @@ public class ReportAPI {
 		cellStyle_wraptext.setBorderBottom(BorderStyle.THIN);
 		cellStyle_wraptext.setBorderLeft(BorderStyle.THIN);
 		cellStyle_wraptext.setBorderRight(BorderStyle.THIN);
-//		
+//
 //		CellStyle cellStyle_wraptext_left = workbook.createCellStyle();
 //		cellStyle_wraptext_left.setAlignment(HorizontalAlignment.LEFT);
 //		cellStyle_wraptext_left.setVerticalAlignment(VerticalAlignment.CENTER);
@@ -591,31 +629,31 @@ public class ReportAPI {
 			return new ResponseEntity<download_template_chaogia_response>(response, HttpStatus.OK);
 		}
 	}
-	
+
 	// download file nhân sư
-		@RequestMapping(value = "/download_temp_personnel", method = RequestMethod.POST)
-		public ResponseEntity<download_template_personnel_response> DownloadPersonnel(HttpServletRequest request) {
+	@RequestMapping(value = "/download_temp_personnel", method = RequestMethod.POST)
+	public ResponseEntity<download_template_personnel_response> DownloadPersonnel(HttpServletRequest request) {
 
-			download_template_personnel_response response = new download_template_personnel_response();
-			try {
-				String FolderPath = "TemplateUpload";
+		download_template_personnel_response response = new download_template_personnel_response();
+		try {
+			String FolderPath = "TemplateUpload";
 
-				// Thư mục gốc upload file.
-				String uploadRootPath = request.getServletContext().getRealPath(FolderPath);
+			// Thư mục gốc upload file.
+			String uploadRootPath = request.getServletContext().getRealPath(FolderPath);
 
-				String filePath = uploadRootPath + "/" + "Template_DSNhanVien.xlsx";
-				Path path = Paths.get(filePath);
-				byte[] data = Files.readAllBytes(path);
-				response.data = data;
-				response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
-				response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
-				return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
-			} catch (Exception e) {
-				response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
-				response.setMessage(e.getMessage());
-				return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
-			}
+			String filePath = uploadRootPath + "/" + "Template_DSNhanVien.xlsx";
+			Path path = Paths.get(filePath);
+			byte[] data = Files.readAllBytes(path);
+			response.data = data;
+			response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
+			response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
+			return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
+			response.setMessage(e.getMessage());
+			return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
 		}
+	}
 
 	// download file nhân sư phương tiện
 	@RequestMapping(value = "/download_temp_personnelBike", method = RequestMethod.POST)
@@ -641,7 +679,7 @@ public class ReportAPI {
 			return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
 		}
 	}
-	
+
 	// download file nhân sư phương tiện
 	@RequestMapping(value = "/download_temp_personnelBank", method = RequestMethod.POST)
 	public ResponseEntity<download_template_personnel_response> download_temp_personnelBank(HttpServletRequest request) {
@@ -666,11 +704,35 @@ public class ReportAPI {
 			return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
 		}
 	}
-	
+	// download file nhân sư lương
+	@RequestMapping(value = "/download_temp_personnelSalary", method = RequestMethod.POST)
+	public ResponseEntity<download_template_personnel_response> download_temp_personnelSalary(HttpServletRequest request) {
+
+		download_template_personnel_response response = new download_template_personnel_response();
+		try {
+			String FolderPath = "TemplateUpload";
+
+			// Thư mục gốc upload file.
+			String uploadRootPath = request.getServletContext().getRealPath(FolderPath);
+
+			String filePath = uploadRootPath + "/" + "Template_DSThongTinLuong.xlsx";
+			Path path = Paths.get(filePath);
+			byte[] data = Files.readAllBytes(path);
+			response.data = data;
+			response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
+			response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
+			return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
+			response.setMessage(e.getMessage());
+			return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
+		}
+	}
+
 	// download template haiquan
 	@RequestMapping(value = "/download_temp_bom_haiquan", method = RequestMethod.POST)
 	public ResponseEntity<down_temp_bom_response> DownloadBomHaiQuan(HttpServletRequest request,
-			@RequestBody down_temp_bom_request entity) throws IOException {
+																	 @RequestBody down_temp_bom_request entity) throws IOException {
 
 		down_temp_bom_response response = new down_temp_bom_response();
 		try {
@@ -848,7 +910,7 @@ public class ReportAPI {
 
 	@RequestMapping(value = "/download_temp_bom_haiquan_sizeset", method = RequestMethod.POST)
 	public ResponseEntity<down_temp_bom_response> DownloadBomHaiQuan_SizeSet(HttpServletRequest request,
-			@RequestBody down_temp_bom_request entity) throws IOException {
+																			 @RequestBody down_temp_bom_request entity) throws IOException {
 
 		down_temp_bom_response response = new down_temp_bom_response();
 		try {
@@ -1021,10 +1083,10 @@ public class ReportAPI {
 			return new ResponseEntity<down_temp_bom_response>(response, HttpStatus.OK);
 		}
 	}
-	
+
 	@RequestMapping(value = "/download_temp_bom_haiquan_new", method = RequestMethod.POST)
 	public ResponseEntity<down_temp_bom_response> DownloadBomHaiQuanNew(HttpServletRequest request,
-			@RequestBody down_temp_bom_request entity) throws IOException {
+																		@RequestBody down_temp_bom_request entity) throws IOException {
 
 		down_temp_bom_response response = new down_temp_bom_response();
 		try {
@@ -1199,10 +1261,10 @@ public class ReportAPI {
 			return new ResponseEntity<down_temp_bom_response>(response, HttpStatus.OK);
 		}
 	}
-	
+
 	@RequestMapping(value = "/download_temp_bom_haiquan_sizeset_new", method = RequestMethod.POST)
 	public ResponseEntity<down_temp_bom_response> DownloadBomHaiQuan_SizeSetNew(HttpServletRequest request,
-			@RequestBody down_temp_bom_request entity) throws IOException {
+																				@RequestBody down_temp_bom_request entity) throws IOException {
 
 		down_temp_bom_response response = new down_temp_bom_response();
 		try {
@@ -1377,7 +1439,7 @@ public class ReportAPI {
 	// download template candoi
 	@RequestMapping(value = "/download_temp_bom_candoi", method = RequestMethod.POST)
 	public ResponseEntity<down_temp_bom_response> DownloadBomCanDoi(HttpServletRequest request,
-			@RequestBody down_temp_bom_request entity) throws IOException {
+																	@RequestBody down_temp_bom_request entity) throws IOException {
 
 		down_temp_bom_response response = new down_temp_bom_response();
 		try {
@@ -1555,7 +1617,7 @@ public class ReportAPI {
 
 	@RequestMapping(value = "/download_temp_bom_candoi_sizeset", method = RequestMethod.POST)
 	public ResponseEntity<down_temp_bom_response> DownloadBomCanDoi_SizeSet(HttpServletRequest request,
-			@RequestBody down_temp_bom_request entity) throws IOException {
+																			@RequestBody down_temp_bom_request entity) throws IOException {
 
 		down_temp_bom_response response = new down_temp_bom_response();
 		try {
@@ -1728,10 +1790,10 @@ public class ReportAPI {
 			return new ResponseEntity<down_temp_bom_response>(response, HttpStatus.OK);
 		}
 	}
-	
+
 	@RequestMapping(value = "/download_temp_bom_candoi_new", method = RequestMethod.POST)
 	public ResponseEntity<down_temp_bom_response> DownloadBomCanDoiNew(HttpServletRequest request,
-			@RequestBody down_temp_bom_request entity) throws IOException {
+																	   @RequestBody down_temp_bom_request entity) throws IOException {
 
 		down_temp_bom_response response = new down_temp_bom_response();
 		try {
@@ -1907,10 +1969,10 @@ public class ReportAPI {
 			return new ResponseEntity<down_temp_bom_response>(response, HttpStatus.OK);
 		}
 	}
-	
+
 	@RequestMapping(value = "/download_temp_bom_candoi_sizeset_new", method = RequestMethod.POST)
 	public ResponseEntity<down_temp_bom_response> DownloadBomCanDoi_SizeSetNew(HttpServletRequest request,
-			@RequestBody down_temp_bom_request entity) throws IOException {
+																			   @RequestBody down_temp_bom_request entity) throws IOException {
 
 		down_temp_bom_response response = new down_temp_bom_response();
 		try {
@@ -2084,7 +2146,7 @@ public class ReportAPI {
 
 	@RequestMapping(value = "/test", method = RequestMethod.POST)
 	public ResponseEntity<report_test_response> Product_GetOne(HttpServletRequest request,
-			@RequestBody report_test_request entity) throws IOException, InvalidFormatException {
+															   @RequestBody report_test_request entity) throws IOException, InvalidFormatException {
 		report_test_response response = new report_test_response();
 		GpayUser user = (GpayUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		long orgrootid_link = user.getRootorgid_link();

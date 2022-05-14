@@ -3,15 +3,7 @@ package vn.gpay.gsmart.core.personel;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -28,7 +20,7 @@ import vn.gpay.gsmart.core.timesheet_shift_type.TimesheetShiftType;
 public class Personel implements Serializable {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	@Id
@@ -61,7 +53,7 @@ public class Personel implements Serializable {
 	private String bike_number;
 	private String bike_color;
 	private String bike_brand;
-    private Integer biketype;
+	private Integer biketype;
 	private Boolean isbike;
 	private Date date_startworking; //ngày vào công ty
 	private Date date_endworking; // ngày nghỉ việc
@@ -75,26 +67,86 @@ public class Personel implements Serializable {
 	private String place_idnumber; //nơi cấp chứng minh thư
 	private String healthinfo;// loại sức khỏe
 	private String insurance_number;//số sổ bảo hiểm
-	private Long timesheet_absence_type_id_link; 
+	private Long timesheet_absence_type_id_link;
 	private String account_number;
 	private String household_number;
-    private String bankname;
-    private Date date_household_grant;
-	
-	@NotFound(action = NotFoundAction.IGNORE)
-	@ManyToOne
-    @JoinColumn(name="levelid_link",insertable=false,updatable =false)
-    private LaborLevel laborLevel;
-	
-	@NotFound(action = NotFoundAction.IGNORE)
-	@ManyToOne
-    @JoinColumn(name="saltypeid_link",insertable=false,updatable =false)
-    private OrgSal_Type saltype;
+	private String bankname;
+	private Date date_household_grant;
+	@Column(name = "salarylevel")
+	private Long salaryLevel;
+	@Column(name = "salarycode")
+	private Long salaryCode;
+	@Column(name = "factorsalarybh")
+	private Float factorSalaryBH;
+	@Column(name = "salarybh")
+	private Long salaryBH;
+	@Column(name = "salarycurrent")
+	private Long salaryCurrent;
+	@Column(name = "factorcv")
+	private Float factorCV;
+
+	public Long getSalaryLevel() {
+		return salaryLevel;
+	}
+
+	public void setSalaryLevel(Long salaryLevel) {
+		this.salaryLevel = salaryLevel;
+	}
+
+	public Long getSalaryCode() {
+		return salaryCode;
+	}
+
+	public void setSalaryCode(Long salaryCode) {
+		this.salaryCode = salaryCode;
+	}
+
+	public Float getFactorSalaryBH() {
+		return factorSalaryBH;
+	}
+
+	public void setFactorSalaryBH(Float factorSalaryBH) {
+		this.factorSalaryBH = factorSalaryBH;
+	}
+
+	public Long getSalaryBH() {
+		return salaryBH;
+	}
+
+	public void setSalaryBH(Long salaryBH) {
+		this.salaryBH = salaryBH;
+	}
+
+	public Long getSalaryCurrent() {
+		return salaryCurrent;
+	}
+
+	public void setSalaryCurrent(Long salaryCurrent) {
+		this.salaryCurrent = salaryCurrent;
+	}
+
+	public Float getFactorCV() {
+		return factorCV;
+	}
+
+	public void setFactorCV(Float factorCV) {
+		this.factorCV = factorCV;
+	}
 
 	@NotFound(action = NotFoundAction.IGNORE)
 	@ManyToOne
-    @JoinColumn(name="sallevelid_link",insertable=false,updatable =false)
-    private OrgSal_Level sallevel;
+	@JoinColumn(name="levelid_link",insertable=false,updatable =false)
+	private LaborLevel laborLevel;
+
+	@NotFound(action = NotFoundAction.IGNORE)
+	@ManyToOne
+	@JoinColumn(name="saltypeid_link",insertable=false,updatable =false)
+	private OrgSal_Type saltype;
+
+	@NotFound(action = NotFoundAction.IGNORE)
+	@ManyToOne
+	@JoinColumn(name="sallevelid_link",insertable=false,updatable =false)
+	private OrgSal_Level sallevel;
 
 	@Transient
 	public String getSaltype_code() {
@@ -110,7 +162,7 @@ public class Personel implements Serializable {
 		}
 		return "";
 	}
-	
+
 	@Transient
 	public String getLaborlevel_name() {
 		if(laborLevel!=null) {
@@ -118,13 +170,13 @@ public class Personel implements Serializable {
 		}
 		return "";
 	}
-	
+
 	@NotFound(action = NotFoundAction.IGNORE)
 	@ManyToOne
-    @JoinColumn(name="orgid_link",insertable=false,updatable =false)
-    private Org org;
-	
-	
+	@JoinColumn(name="orgid_link",insertable=false,updatable =false)
+	private Org org;
+
+
 	@Transient
 	public String getOrgname() {
 		if(org!=null) {
@@ -132,13 +184,20 @@ public class Personel implements Serializable {
 		}
 		return "";
 	}
-	
+	@Transient
+	public String getOrgCode() {
+		if(org != null) {
+			return org.getCode();
+		}
+		return "";
+	}
+
 	@NotFound(action = NotFoundAction.IGNORE)
 	@ManyToOne
-    @JoinColumn(name="orgmanagerid_link",insertable=false,updatable =false)
-    private Org orgManage;
-	
-	
+	@JoinColumn(name="orgmanagerid_link",insertable=false,updatable =false)
+	private Org orgManage;
+
+
 	@Transient
 	public String getOrgManageName() {
 		if(orgManage!=null) {
@@ -146,7 +205,7 @@ public class Personel implements Serializable {
 		}
 		return "";
 	}
-	
+
 	@Transient
 	public String getOrgGrantName() {
 		if(orgManage!=null && org != null) {
@@ -156,10 +215,10 @@ public class Personel implements Serializable {
 	}
 	@NotFound(action = NotFoundAction.IGNORE)
 	@ManyToOne
-    @JoinColumn(name="timesheet_absence_type_id_link",insertable=false,updatable =false)
-    private TimesheetShiftType timesheetshifttype;
-	
-	
+	@JoinColumn(name="timesheet_absence_type_id_link",insertable=false,updatable =false)
+	private TimesheetShiftType timesheetshifttype;
+
+
 	@Transient
 	public String getShiftName() {
 		if(timesheetshifttype!=null) {
@@ -167,16 +226,23 @@ public class Personel implements Serializable {
 		}
 		return "";
 	}
-	
+
 	@NotFound(action = NotFoundAction.IGNORE)
 	@ManyToOne
-    @JoinColumn(name="positionid_link",insertable=false,updatable =false)
-    private Personnel_Position personnel_position;
+	@JoinColumn(name="positionid_link",insertable=false,updatable =false)
+	private Personnel_Position personnel_position;
 
 	@Transient
-	public String getPosition() {
+	public String getPositionName() {
 		if(personnel_position!=null) {
 			return personnel_position.getName();
+		}
+		return "";
+	}
+	@Transient
+	public String getPositionCode() {
+		if(personnel_position != null) {
+			return personnel_position.getCode();
 		}
 		return "";
 	}
@@ -458,20 +524,20 @@ public class Personel implements Serializable {
 		this.account_number = account_number;
 	}
 	public String getBankname() {
-        return bankname;
-    }
+		return bankname;
+	}
 
-    public void setBankname(String bankname) {
-        this.bankname = bankname;
-    }
+	public void setBankname(String bankname) {
+		this.bankname = bankname;
+	}
 
-    public Date getDate_household_grant() {
-        return date_household_grant;
-    }
+	public Date getDate_household_grant() {
+		return date_household_grant;
+	}
 
-    public void setDate_household_grant(Date date_household_grant) {
-        this.date_household_grant = date_household_grant;
-    }
+	public void setDate_household_grant(Date date_household_grant) {
+		this.date_household_grant = date_household_grant;
+	}
 	public Integer getBiketype() {
 		return biketype;
 	}

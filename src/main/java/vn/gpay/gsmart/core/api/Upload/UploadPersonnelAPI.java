@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -38,12 +39,7 @@ import vn.gpay.gsmart.core.personnel_position.Personnel_Position;
 import vn.gpay.gsmart.core.personnel_type.IPersonnelType_Service;
 import vn.gpay.gsmart.core.personnel_type.PersonnelType;
 import vn.gpay.gsmart.core.security.GpayUser;
-import vn.gpay.gsmart.core.utils.ColumnPersonnel;
-import vn.gpay.gsmart.core.utils.ColumnPersonnelBank;
-import vn.gpay.gsmart.core.utils.ColumnPersonnelBike;
-import vn.gpay.gsmart.core.utils.Common;
-import vn.gpay.gsmart.core.utils.PersonnelBikeType;
-import vn.gpay.gsmart.core.utils.ResponseMessage;
+import vn.gpay.gsmart.core.utils.*;
 
 
 @RestController
@@ -67,7 +63,7 @@ public class UploadPersonnelAPI {
 	IOrgTypeService orgtype_service;
 	@RequestMapping(value = "/personnel", method = RequestMethod.POST)
 	public ResponseEntity<ResponseBase> UploadPersonnel(HttpServletRequest request,
-			@RequestParam("file") MultipartFile file, @RequestParam("orgmanageid_link") long orgmanageid_link) {
+														@RequestParam("file") MultipartFile file, @RequestParam("orgmanageid_link") long orgmanageid_link) {
 		ResponseBase response = new ResponseBase();
 		Date current_time = new Date();
 		String name = "";
@@ -108,7 +104,7 @@ public class UploadPersonnelAPI {
 					MaSoMoi = MaSoMoi.equals("0") ? "" : MaSoMoi;
 					while (!MaSoMoi.equals("")) {
 
-					
+
 						// tim nhan vien theo ma so moi và đơn vị đang được chọn
 						person = personnel_service.getPersonelBycode_orgmanageid_link(MaSoMoi, orgmanageid_link);
 						// neu khong co nhan vien. thi tao nhan vien moi theo ma so moi
@@ -116,8 +112,8 @@ public class UploadPersonnelAPI {
 							person = new Personel();
 							person.setCode(MaSoMoi);
 						}
-						
-						
+
+
 						String ThoiVu = commonService.getStringValue(row.getCell(ColumnPersonnel.ThoiVu)).trim();
 						Long LoaiNV = null;
 						String ssThoiVu = ThoiVu.trim().toLowerCase();
@@ -125,12 +121,12 @@ public class UploadPersonnelAPI {
 							//lấy id của loại nhân viên
 							List<PersonnelType> lst_type=personneltypeService.getByName("Thời vụ");
 							LoaiNV=lst_type.get(0).getId();
-							
+
 						}else {
 							List<PersonnelType> lst_type=personneltypeService.getByName("Hợp đồng");
 							LoaiNV=lst_type.get(0).getId();
 						}
-						
+
 						String HoVaTen = commonService.getStringValue(row.getCell(ColumnPersonnel.HoVaTen)).trim();
 						String gioiTinh = commonService.getStringValue(row.getCell(ColumnPersonnel.GT)).trim();
 						int GioiTinh;
@@ -237,9 +233,9 @@ public class UploadPersonnelAPI {
 						//lấy mã bộ phận
 						if (lst_bp.size() != 0) {
 							// thêm
-						//	orgid_link = lst_bp.get(0).getId();
+							//	orgid_link = lst_bp.get(0).getId();
 							for(int i =0;i< lst_bp.size();i++) {
-								
+
 								//orgid_link = lst_bp.get(i).getId();
 								//kiểm tra xem mã loại đơn vị của phòng ban có trong DB orgtype ko?
 								//1.nếu có thì lấy
@@ -255,8 +251,8 @@ public class UploadPersonnelAPI {
 						} else {
 
 							// nếu chưa có thì thêm bộ phận vào DB
-							 mes_err = " Bộ phận không tồn tại! " + " ở dòng " + (rowNum+1) + " cột Bộ Phận ";
-							 break;
+							mes_err = " Bộ phận không tồn tại! " + " ở dòng " + (rowNum+1) + " cột Bộ Phận ";
+							break;
 						}
 
 						// ngay vao cong ty
@@ -312,7 +308,7 @@ public class UploadPersonnelAPI {
 								NgayThoiViec = row.getCell(ColumnPersonnel.NgayThoiViec).getDateCellValue();
 							}
 						}
-						
+
 						//loại nhân viên
 						String tinhTrang = commonService.getStringValue(row.getCell(ColumnPersonnel.TinhTrang)).trim();
 						int TinhTrang =0;
@@ -332,8 +328,8 @@ public class UploadPersonnelAPI {
 //								continue;
 							}
 						}
-						
-						
+
+
 						// ngay ki hop dong thu viec
 						Date NgayKiHDTV = null;
 						try {
@@ -420,7 +416,7 @@ public class UploadPersonnelAPI {
 						String Tinh = commonService.getStringValue(row.getCell(ColumnPersonnel.Tinh)).trim();
 						String DiaChi = commonService.getStringValue(row.getCell(ColumnPersonnel.DiaChi)).trim();
 						String DT = commonService.getStringValue(row.getCell(ColumnPersonnel.DienThoai)).trim();
-						
+
 						String SoSoHoKhau = commonService.getStringValue(row.getCell(ColumnPersonnel.SoSoHoKhau)).trim();
 						String SoTaiKhoan = commonService.getStringValue(row.getCell(ColumnPersonnel.SoTaiKhoan)).trim();
 						if (DT.equals("#N/A")) {
@@ -469,7 +465,7 @@ public class UploadPersonnelAPI {
 							// lấy id huyện vừa thêm
 							Org id_org = org_service.save(org);
 							huyen = id_org.getId();
-//							
+//
 						}
 						// kiem tra xa trong danh sach huyen orgtypeid_link = 27;
 						Long xa = null;
@@ -503,7 +499,7 @@ public class UploadPersonnelAPI {
 									mes_err = " Định dạng ngày cấp không đúng dd/MM/yyyy! ở dòng " + (rowNum+1) +" cột Ngày cấp";
 									break;
 								}
-								
+
 								if (Integer.parseInt(s_date[1].toString()) < 13
 										&& Integer.parseInt(s_date[0].toString()) < 32) {
 									NgayCap = new SimpleDateFormat("dd/MM/yyyy").parse(ngayCap);
@@ -551,58 +547,58 @@ public class UploadPersonnelAPI {
 								NgayCapMoi = row.getCell(ColumnPersonnel.NgayCapMoi).getDateCellValue();
 							}
 						}
-						
-                        ///
-                        // Ngay cap so ho khau
-                        Date NgayCapSoHoKhau = null;
-                        try {
-                            String ngayCapSoHoKhau = commonService.getStringValue(row.getCell(ColumnPersonnel.NgayCapHoKhau));
-                            if (ngayCapSoHoKhau.contains("/")) {
-                                String[] s_date = ngayCapSoHoKhau.split("/");
-                                if (Integer.parseInt(s_date[1].toString()) < 13
-                                        && Integer.parseInt(s_date[0].toString()) < 32
-                                        && Integer.parseInt(s_date[0]) > 0
-                                        && Integer.parseInt(s_date[1]) > 0) {
-                                    NgayCapSoHoKhau = new SimpleDateFormat("dd/MM/yyyy").parse(ngayCapSoHoKhau);
+
+						///
+						// Ngay cap so ho khau
+						Date NgayCapSoHoKhau = null;
+						try {
+							String ngayCapSoHoKhau = commonService.getStringValue(row.getCell(ColumnPersonnel.NgayCapHoKhau));
+							if (ngayCapSoHoKhau.contains("/")) {
+								String[] s_date = ngayCapSoHoKhau.split("/");
+								if (Integer.parseInt(s_date[1].toString()) < 13
+										&& Integer.parseInt(s_date[0].toString()) < 32
+										&& Integer.parseInt(s_date[0]) > 0
+										&& Integer.parseInt(s_date[1]) > 0) {
+									NgayCapSoHoKhau = new SimpleDateFormat("dd/MM/yyyy").parse(ngayCapSoHoKhau);
 
 
 
-                                } else {
-                                    mes_err = " Định dạng ngày cấp mới không đúng dd/MM/yyyy! " + " ở dòng  "
-                                            + (rowNum+1);
-                                    break;
-                                }
-                            } else if (ngayCapSoHoKhau != "") {
-                                if (DateUtil.isCellDateFormatted(row.getCell(ColumnPersonnel.NgayCapHoKhau))) {
-                                    NgayCapSoHoKhau = row.getCell(ColumnPersonnel.NgayCapHoKhau).getDateCellValue();
-                                }
-                            }
-                        } catch (Exception e) {
-                            if (DateUtil.isCellDateFormatted(row.getCell(ColumnPersonnel.NgayCapHoKhau))) {
-                                NgayCapSoHoKhau = row.getCell(ColumnPersonnel.NgayCapHoKhau).getDateCellValue();
-                            }
-                        }
+								} else {
+									mes_err = " Định dạng ngày cấp mới không đúng dd/MM/yyyy! " + " ở dòng  "
+											+ (rowNum+1);
+									break;
+								}
+							} else if (ngayCapSoHoKhau != "") {
+								if (DateUtil.isCellDateFormatted(row.getCell(ColumnPersonnel.NgayCapHoKhau))) {
+									NgayCapSoHoKhau = row.getCell(ColumnPersonnel.NgayCapHoKhau).getDateCellValue();
+								}
+							}
+						} catch (Exception e) {
+							if (DateUtil.isCellDateFormatted(row.getCell(ColumnPersonnel.NgayCapHoKhau))) {
+								NgayCapSoHoKhau = row.getCell(ColumnPersonnel.NgayCapHoKhau).getDateCellValue();
+							}
+						}
 
-                        String TenNganHang = commonService.getStringValue(row.getCell(ColumnPersonnel.TenNganHang)).trim();
+						String TenNganHang = commonService.getStringValue(row.getCell(ColumnPersonnel.TenNganHang)).trim();
 						String NoiCapMoi = commonService.getStringValue(row.getCell(ColumnPersonnel.NoiCapMoi)).trim();
 						String SK = commonService.getStringValue(row.getCell(ColumnPersonnel.SucKhoe)).trim();
 						String SoSBH = commonService.getStringValue(row.getCell(ColumnPersonnel.SoSBH)).trim();
 						if (SoSBH.equals("#N/A")) {
 							SoSBH = "";
 						}
-						
+
 //						String BienSoXe = commonService.getStringValue(row.getCell(ColumnPersonnel.BienSoXe)).trim();
 //						String XeDap = commonService.getStringValue(row.getCell(ColumnPersonnel.XeDap)).trim();
 //						Boolean isXeDap = false;
 //						if(XeDap.toLowerCase().equals("x")) {
 //							isXeDap = true;
 //						}
-						
+
 
 						// person.setCode(MaSoMoi);
 						person.setOrgrootid_link(orgrootid_link);
 						person.setStatus(TinhTrang);
-						
+
 						//loại nhân viên
 						person.setPersonnel_typeid_link(LoaiNV);
 						person.setFullname(HoVaTen);
@@ -647,11 +643,11 @@ public class UploadPersonnelAPI {
 						person.setInsurance_number(SoSBH);
 						person.setAccount_number(SoTaiKhoan);
 						person.setHousehold_number(SoSoHoKhau);
-                        person.setBankname(TenNganHang);
-                        person.setDate_household_grant(NgayCapSoHoKhau);
+						person.setBankname(TenNganHang);
+						person.setDate_household_grant(NgayCapSoHoKhau);
 //                        person.setBike_number(BienSoXe);
 //                        person.setIsbike(isXeDap);
-						
+
 						// luu nhan vien
 						Personel personnel = personnel_service.save(person);
 						Long personnelid_link = personnel.getId();
@@ -738,10 +734,10 @@ public class UploadPersonnelAPI {
 
 		return new ResponseEntity<ResponseBase>(response, HttpStatus.OK);
 	}
-	
+
 	@RequestMapping(value = "/personnelUploadBike", method = RequestMethod.POST)
 	public ResponseEntity<ResponseBase> UploadPersonnelBike(HttpServletRequest request,
-			@RequestParam("file") MultipartFile file) {
+															@RequestParam("file") MultipartFile file) {
 		ResponseBase response = new ResponseBase();
 		Date current_time = new Date();
 		String name = "";
@@ -794,7 +790,7 @@ public class UploadPersonnelAPI {
 								String NhanHieu = commonService.getStringValue(row.getCell(ColumnPersonnelBike.NhanHieu)).trim();
 								String MauXe = commonService.getStringValue(row.getCell(ColumnPersonnelBike.MauXe)).trim();
 								String BienSo = commonService.getStringValue(row.getCell(ColumnPersonnelBike.BienSo)).trim();
-								
+
 								Integer bikeType = 0;
 								// xe máy, xe đạp điện, xe đạp
 								if(LoaiXe.toLowerCase().equals("xe máy")) {
@@ -816,7 +812,7 @@ public class UploadPersonnelAPI {
 								personel = personnel_service.save(personel);
 							}
 						}
-						
+
 						response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
 						response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
 
@@ -854,10 +850,179 @@ public class UploadPersonnelAPI {
 
 		return new ResponseEntity<ResponseBase>(response, HttpStatus.OK);
 	}
-	
+	@RequestMapping(value = "/personnelUploadSalary", method = RequestMethod.POST)
+	public ResponseEntity<ResponseBase> UploadPersonnelSalary(HttpServletRequest request,
+															  @RequestParam("file") MultipartFile file) {
+		ResponseBase response = new ResponseBase();
+		Date current_time = new Date();
+		String name = "";
+		String mes_err = "";
+		List<Personel> personList = new ArrayList<Personel>();
+		GpayUser user = (GpayUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Long orgrootid_link = user.getRootorgid_link();
+		try {
+			String FolderPath = "upload/personnel";
+			String uploadRootPath = request.getServletContext().getRealPath(FolderPath);
+			File uploadRootDir = new File(uploadRootPath);
+			if (!uploadRootDir.exists()) {
+				uploadRootDir.mkdirs();
+			}
+			name = file.getOriginalFilename();
+
+			if (name != null && name.length() > 0) {
+				String[] str = name.split("\\.");
+				String extend = str[str.length - 1];
+				name = current_time.getTime() + "." + extend;
+				File serverFile = new File(uploadRootDir.getAbsolutePath() + File.separator + name);
+				BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
+				stream.write(file.getBytes());
+				stream.close();
+
+				// doc file upload
+				XSSFWorkbook workbook = new XSSFWorkbook(serverFile);
+				XSSFSheet sheet = workbook.getSheetAt(0);
+
+				int rowNum = 1;
+				// int colNum = 1;
+
+				Row row = sheet.getRow(rowNum);
+
+				try {
+					String MaSoNV = "";
+					MaSoNV = commonService.getStringValue(row.getCell(ColumnPersonnelSalary.MaSoNV)).trim();
+					MaSoNV = MaSoNV.equals("0") ? "" : MaSoNV;
+					while (!MaSoNV.equals("")) {
+						// tim nhan vien theo ma so và đơn vị đang được chọn
+						personList = personnel_service.getPersonelByCodeAndOrgManager(MaSoNV, null);
+						if(personList.size() == 0) {
+							// không tìm thấy nhân viên với mã số -> báo lỗi
+							mes_err = " Nhân viên với mã số " + MaSoNV + " ở dòng " + (rowNum+1) + " không tồn tại. ";
+							break;
+						}else {
+							//
+							for(Personel personel : personList) {
+								try {
+									Long bac = 0L;
+									Long maBacLuongBH = 0L;
+									Float heSoLuongBH = 0f;
+									Long mucLuongDongBH = 0L;
+									Long mucLuongHienTai = 0L;
+									Float heSoCV = 0f;
+
+									String Bac = commonService.getStringValue(row.getCell(ColumnPersonnelSalary.Bac)).trim();
+									if(Bac != "") {
+										bac = Long.parseLong(Bac);
+									}
+									if (bac < 0) {
+										mes_err = " Nhân viên với mã số " + MaSoNV + " ở dòng " + (rowNum + 1) + " có cột " + ColumnPersonnelSalary.Bac + " nhỏ hơn không!";
+										break;
+									}
+
+									String MaBacLuongBH = commonService.getStringValue(row.getCell(ColumnPersonnelSalary.MaBacLuongBH)).trim();
+									if(MaBacLuongBH != "") {
+										maBacLuongBH = Long.parseLong(MaBacLuongBH);
+									}
+									if (maBacLuongBH < 0) {
+										mes_err = " Nhân viên với mã số " + MaSoNV + " ở dòng " + (rowNum + 1) + " có cột " + ColumnPersonnelSalary.MaBacLuongBH + " nhỏ hơn không!";
+										break;
+									}
+
+									String HeSoLuongBH = commonService.getStringValue(row.getCell(ColumnPersonnelSalary.HeSoLuongBH)).trim();
+									if(HeSoLuongBH != "") {
+										heSoLuongBH = Float.parseFloat(HeSoLuongBH);
+									}
+									if (heSoLuongBH < 0) {
+										mes_err = " Nhân viên với mã số " + MaSoNV + " ở dòng " + (rowNum + 1) + " có cột " + ColumnPersonnelSalary.HeSoLuongBH + " nhỏ hơn không!";
+										break;
+									}
+
+									String MucLuongDongBH = commonService.getStringValue(row.getCell(ColumnPersonnelSalary.MucLuongDongBH)).trim();
+									if(MucLuongDongBH != "") {
+										mucLuongDongBH = Long.parseLong(MucLuongDongBH);
+									}
+									if (mucLuongDongBH < 0) {
+										mes_err = " Nhân viên với mã số " + MaSoNV + " ở dòng " + (rowNum + 1) + " có cột " + ColumnPersonnelSalary.MucLuongDongBH + " nhỏ hơn không!";
+										break;
+									}
+
+									String MucLuongHienTai = commonService.getStringValue(row.getCell(ColumnPersonnelSalary.MucLuongHienTai)).trim();
+									if(MucLuongHienTai != "") {
+										mucLuongHienTai = Long.parseLong(MucLuongHienTai);
+									}
+									if (mucLuongHienTai < 0) {
+										mes_err = " Nhân viên với mã số " + MaSoNV + " ở dòng " + (rowNum + 1) + " có cột " + ColumnPersonnelSalary.MucLuongHienTai + " nhỏ hơn không!";
+										break;
+									}
+
+									System.out.println("test");
+									System.out.println(row.getCell(ColumnPersonnelSalary.HeSoCV));
+									String HeSoCV = commonService.getStringValue(row.getCell(ColumnPersonnelSalary.HeSoCV)).trim();
+									System.out.println(HeSoCV);
+									System.out.println("test");
+									if(HeSoCV != "") {
+										heSoCV = Float.parseFloat(HeSoCV);
+									}
+									if (heSoCV < 0) {
+										mes_err = " Nhân viên với mã số " + MaSoNV + " ở dòng " + (rowNum + 1) + " có cột " + ColumnPersonnelSalary.HeSoCV + " nhỏ hơn không!";
+										break;
+									}
+									personel.setSalaryLevel(bac);
+									personel.setSalaryCode(maBacLuongBH);
+									personel.setFactorSalaryBH(heSoLuongBH);
+									personel.setSalaryBH(mucLuongDongBH);
+									personel.setSalaryCurrent(mucLuongHienTai);
+									personel.setFactorCV(heSoCV);
+									personel = personnel_service.save(personel);
+								}
+								catch (Exception e) {
+									mes_err = " Nhân viên với mã số " + MaSoNV + " ở dòng " + (rowNum+1) + " có cột không đúng định dạng số ";
+									break;
+								}
+							}
+						}
+						if (mes_err != "") {
+							break;
+						}
+//						response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
+//						response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
+
+						// Chuyen sang row tiep theo neu con du lieu thi xu ly tiep khong thi dung lai
+						rowNum++;
+						row = sheet.getRow(rowNum);
+						if (row == null)
+							break;
+
+						MaSoNV = commonService.getStringValue(row.getCell(ColumnPersonnelSalary.MaSoNV)).trim();
+						MaSoNV = MaSoNV.equals("0") ? "" : MaSoNV;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					mes_err = "Có lỗi ở dòng " + (rowNum + 1) + " " + mes_err;
+				} finally {
+					workbook.close();
+					serverFile.delete();
+				}
+				// neu co loi
+				if (mes_err == "") {
+					response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
+					response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
+				} else {
+					response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
+					response.setMessage(mes_err);
+				}
+			}
+
+		} catch (Exception e) {
+			response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
+			response.setMessage(e.getMessage());
+		}
+
+		return new ResponseEntity<ResponseBase>(response, HttpStatus.OK);
+	}
+
 	@RequestMapping(value = "/personnelUploadBank", method = RequestMethod.POST)
 	public ResponseEntity<ResponseBase> UploadPersonnelBank(HttpServletRequest request,
-			@RequestParam("file") MultipartFile file) {
+															@RequestParam("file") MultipartFile file) {
 		ResponseBase response = new ResponseBase();
 		Date current_time = new Date();
 		String name = "";
@@ -908,13 +1073,13 @@ public class UploadPersonnelAPI {
 							for(Personel personel : personList) {
 								String NganHang = commonService.getStringValue(row.getCell(ColumnPersonnelBank.NganHang)).trim();
 								String SoTaiKhoan = commonService.getStringValue(row.getCell(ColumnPersonnelBank.SoTaiKhoan)).trim();
-								
+
 								personel.setBankname(NganHang);
 								personel.setAccount_number(SoTaiKhoan);
 								personel = personnel_service.save(personel);
 							}
 						}
-						
+
 						response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
 						response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
 
