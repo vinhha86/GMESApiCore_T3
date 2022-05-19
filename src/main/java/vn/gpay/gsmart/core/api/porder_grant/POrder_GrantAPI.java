@@ -449,7 +449,52 @@ public class POrder_GrantAPI {
 			return new ResponseEntity<get_KeHoachVaoChuyen_response>(response, HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
+
+	@RequestMapping(value = "/getDanhSachLenhKeHoachByDate", method = RequestMethod.POST)
+	public ResponseEntity<POrder_grant_getchange_response> getDanhSachLenhKeHoachByDate(@RequestBody POrder_Grant_findOne_request entity, HttpServletRequest request) {
+		POrder_grant_getchange_response response = new POrder_grant_getchange_response();
+		try {
+			GpayUser user = (GpayUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			Long orgid_link = user.getOrgid_link();
+			Date date = entity.date;
+			Long productid_link = entity.productid_link;
+			List<Long> orgs = new ArrayList<Long>();
+			if (orgid_link != 0 && orgid_link != 1) {
+				// lay cua phan xuong
+				for (GpayUserOrg userorg : userOrgService.getall_byuser(user.getId())) {
+					orgs.add(userorg.getOrgid_link());
+				}
+				// Them chinh don vi cua user
+				orgs.add(orgid_link);
+//				System.out.println("px");
+//				System.out.println(orgs);
+
+				response.data = new ArrayList<POrderGrant>();
+				for (Long orgid : orgs) {
+					// lay danh sach cac lenh ke hoach cua px
+					response.data.addAll(porderGrantService.get_dsLenhKeHoach_byProductAndDate(productid_link,date,orgid));
+				}
+			} else {
+				// lay all
+//				System.out.println("all");
+//				System.out.println(orgs);
+				// lay danh sach cac lenh ke hoach
+				response.data = porderGrantService.get_dsLenhKeHoach_byProductAndDate(productid_link,date, null);
+			}
+
+			response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
+			response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
+			return new ResponseEntity<POrder_grant_getchange_response>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
+			response.setMessage(e.getMessage());
+			return new ResponseEntity<POrder_grant_getchange_response>(response, HttpStatus.BAD_REQUEST);
+		}
+	}
+
+
+
 	@RequestMapping(value = "/getDanhSachLenhKeHoach", method = RequestMethod.POST)
 	public ResponseEntity<POrder_grant_getchange_response> getDanhSachLenhKeHoach(@RequestBody POrder_Grant_findOne_request entity, HttpServletRequest request) {
 		POrder_grant_getchange_response response = new POrder_grant_getchange_response();
@@ -490,4 +535,8 @@ public class POrder_GrantAPI {
 			return new ResponseEntity<POrder_grant_getchange_response>(response, HttpStatus.BAD_REQUEST);
 		}
 	}
+
+
+
+
 }

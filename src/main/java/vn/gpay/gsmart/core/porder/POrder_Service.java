@@ -219,6 +219,11 @@ public class POrder_Service extends AbstractService<POrder> implements IPOrder_S
 	}
 
 	@Override
+	public List<POrder> getByProductIdLink(Long productid_link) {
+		return repo.getByProductIdLink(productid_link);
+	}
+
+	@Override
 	public List<POrder> getByPOAndProduct(Long pcontract_poid_link, Long productid_link) {
 		return repo.getByPOAndProduct(pcontract_poid_link, productid_link);
 	}

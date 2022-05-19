@@ -34,7 +34,7 @@ public interface ITimesheetAbsenceRepository
 
 	@Query(value = "select count(c.id) from TimesheetAbsence c "
 			+ " inner join Personel b on c.personnelid_link = b.id "
-			+ " where b.orgid_link = :Org_grant_id_link and absencedate_from <= :today and absencedate_to >= :today")
+			+ " where b.orgid_link = :Org_grant_id_link and c.absencedate_from <= :today and c.absencedate_to >= :today")
 	public int getbyOrg_grant_id_link_Today(@Param("Org_grant_id_link") final Long Org_grant_id_link,
 			@Param("today") final Date today);
 

@@ -4,4 +4,5 @@ import vn.gpay.gsmart.core.base.RequestBase;
 
 public class Product_getProductByBuyercode_request extends RequestBase{
 	public String buyercode;
+	public Integer producttypeid_link;
 }

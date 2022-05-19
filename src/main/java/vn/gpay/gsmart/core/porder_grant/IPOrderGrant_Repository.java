@@ -133,5 +133,19 @@ public interface IPOrderGrant_Repository
 	public List<POrderGrant> get_dsLenhKeHoach_byProduct(
 			@Param("productid_link") final Long productid_link,
 			@Param("orgid") final Long orgid
-			);	
+			);
+
+	@Query(value = "select distinct a from POrderGrant a "
+			+ " inner join POrder b on a.porderid_link = b.id "
+			+ " where b.productid_link = :productid_link "
+			+ " and (b.granttoorgid_link in :orgid or :orgid is null ) "
+			+ " and a.start_date_plan <= :date and  a.finish_date_plan >= :date"
+			+ " and (a.ismap is null or a.ismap is false) "
+			+ " and a.status = 2 "
+	)
+	public List<POrderGrant> get_dsLenhKeHoach_byProductAndDate(
+			@Param("productid_link") final Long productid_link,
+			@Param("date") final Date date,
+			@Param("orgid") final Long orgid
+	);
 }

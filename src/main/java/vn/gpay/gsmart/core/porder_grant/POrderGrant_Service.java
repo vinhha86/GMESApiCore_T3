@@ -187,4 +187,9 @@ public class POrderGrant_Service extends AbstractService<POrderGrant> implements
 	public List<POrderGrant> get_dsLenhKeHoach_byProduct(Long productid_link, Long orgid) {
 		return repo.get_dsLenhKeHoach_byProduct(productid_link, orgid);
 	}
+	@Override
+	public List<POrderGrant> get_dsLenhKeHoach_byProductAndDate(Long productid_link,Date date ,Long orgid) {
+		return repo.get_dsLenhKeHoach_byProductAndDate(productid_link,date, orgid);
+	}
 }
+

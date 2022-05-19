@@ -1,5 +1,6 @@
 package vn.gpay.gsmart.core.porder_grant;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -51,4 +52,5 @@ public interface IPOrderGrant_Service extends Operations<POrderGrant> {
 	
 	List<POrderGrant> get_dsLenhKeHoach_byProduct(Long productid_link, Long orgid);
 
+	List<POrderGrant> get_dsLenhKeHoach_byProductAndDate(Long productid_link, Date date, Long orgid);
 }

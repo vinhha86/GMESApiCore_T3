@@ -118,6 +118,9 @@ public class ProductAPI {
 		}
 	}
 
+
+
+
 	@RequestMapping(value = "/getall_product_single", method = RequestMethod.POST)
 	public ResponseEntity<GetProductSingle_response> GetProductSingle(HttpServletRequest request,
 			@RequestBody GetProductSingle_request entity) {
@@ -1368,6 +1371,30 @@ public class ProductAPI {
 			return new ResponseEntity<getlistproduct_bypairingid_response>(response, HttpStatus.BAD_REQUEST);
 		}
 	}
+
+	@RequestMapping(value = "/getProductByLikeBuyercodeAndType", method = RequestMethod.POST)
+	public ResponseEntity<Product_getProductByBuyercode_response> getProductByLikeBuyercodeAndType(HttpServletRequest request,
+																			  @RequestBody Product_getProductByBuyercode_request entity) {
+		Product_getProductByBuyercode_response response = new Product_getProductByBuyercode_response();
+		try {
+			List<Product> list = productService.getByBuyerCodeAndType(entity.buyercode,entity.producttypeid_link);
+			if (list.size() > 0) {
+				response.data = list;
+			} else {
+				response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
+				response.setMessage("Mã SP(buyer) không tồn tại");
+				return new ResponseEntity<Product_getProductByBuyercode_response>(response, HttpStatus.OK);
+			}
+			response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
+			response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
+			return new ResponseEntity<Product_getProductByBuyercode_response>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
+			response.setMessage(e.getMessage());
+			return new ResponseEntity<Product_getProductByBuyercode_response>(response, HttpStatus.OK);
+		}
+	}
+
 
 	@RequestMapping(value = "/getProductByExactBuyercode", method = RequestMethod.POST)
 	public ResponseEntity<Product_getOne_Response> getProductByExactBuyercode(HttpServletRequest request,

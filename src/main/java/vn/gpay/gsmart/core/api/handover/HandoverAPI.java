@@ -33,10 +33,7 @@ import vn.gpay.gsmart.core.porder_grant.POrderGrant;
 import vn.gpay.gsmart.core.porderprocessing.IPOrderProcessing_Service;
 import vn.gpay.gsmart.core.porderprocessing.POrderProcessing;
 import vn.gpay.gsmart.core.security.GpayUser;
-import vn.gpay.gsmart.core.utils.GPAYDateFormat;
-import vn.gpay.gsmart.core.utils.HandOverType;
-import vn.gpay.gsmart.core.utils.POrderStatus;
-import vn.gpay.gsmart.core.utils.ResponseMessage;
+import vn.gpay.gsmart.core.utils.*;
 
 @RestController
 @RequestMapping("/api/v1/handover")
@@ -71,7 +68,7 @@ public class HandoverAPI {
 		try {
 			GpayUser user = (GpayUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 			Handover handover = entity.data;
-//			HandoverProduct handoverProduct = entity.handoverProduct;
+			Boolean isEditAmount = entity.isEditAmount;
 			List<HandoverProduct> handoverProducts = handover.getHandoverProducts(); //
 			Long type = handover.getHandovertypeid_link();
 			
@@ -163,7 +160,14 @@ public class HandoverAPI {
 				Date date = new Date();
 				Integer total = 0;
 				Integer totalCheck = 0;
-				
+				if(isEditAmount){
+					Handover handover1 = handoverService.findOne(handover.getId());
+					if(handover1.getStatus()>= HandOverStatus.HANDOVER_STATUS_APPROVED){
+						response.setRespcode(ResponseMessage.KEY_RC_BAD_REQUEST);
+						response.setMessage("Phiếu đã được duyệt xuất");
+						return new ResponseEntity<Handover_create_response>(response,HttpStatus.OK);
+					}
+				}
 				if(handover.getHandovertypeid_link().equals(9L)) { // nếu type là pack to stock
 					// chia điều kiện vì pack to stock không có porderid_link
 					handover.setOrgrootid_link(user.getRootorgid_link());

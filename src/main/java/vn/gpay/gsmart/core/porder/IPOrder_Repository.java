@@ -35,6 +35,9 @@ public interface IPOrder_Repository extends JpaRepository<POrder, Long>, JpaSpec
 	public List<POrder> getByContractAndPO(@Param("pcontractid_link") final Long pcontractid_link,
 			@Param("pcontract_poid_link") final Long pcontract_poid_link);
 
+	@Query("SELECT c FROM POrder c " + "where c.productid_link = :productid_link ")
+	public List<POrder> getByProductIdLink(@Param("productid_link") final Long productid_link);
+
 	@Query("SELECT c FROM POrder c " + "where c.pcontractid_link = :pcontractid_link "
 			+ "and c.pcontract_poid_link = :pcontract_poid_link " + "and c.status >= 0")
 	public List<POrder> getByContractAndPO_Granted(@Param("pcontractid_link") final Long pcontractid_link,
