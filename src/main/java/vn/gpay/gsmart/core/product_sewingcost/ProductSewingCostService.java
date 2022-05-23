@@ -37,6 +37,18 @@ public class ProductSewingCostService  extends AbstractService<ProductSewingCost
 	public List<ProductSewingCost> getbyProductPcontract(Long productid_link, Long pcontractid_link) {
 		return repo.getbyProductPcontract(productid_link, pcontractid_link);
 	}
+	// // Lay danh sach theo ten Cong Doan ( nam trong va ngoai va cum cong doan)
+    @Override
+    public List<ProductSewingCost> findByProductPcontractName(Long productid_link, Long pcontractid_link, String name) {
+        return repo.findByProductPcontractName(productid_link, pcontractid_link, name);
+    }
+	@Override
+	public List <ProductSewingCost> findByProductPcontractNameInBalance(Long productid_link, Long pcontractid_link, String name) {
+		return repo.findByProductPcontractNameInBalance(productid_link, pcontractid_link, name);
+	}
 
-
+	@Override
+	public List<ProductSewingCost> findByProductPcontractNameOutBalance(Long productid_link, Long pcontractid_link, String name) {
+		return repo.findByProductPcontractNameOutBalance(productid_link, pcontractid_link, name);
+	}
 }

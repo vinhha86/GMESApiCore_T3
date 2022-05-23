@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,5 +42,12 @@ public interface IProductBalanceRepository  extends JpaRepository<ProductBalance
 			@Param ("productid_link")final Long productid_link,
 			@Param ("pcontractid_link")final Long pcontractid_link
 			);
-
+	@Query(value = "select c from ProductBalance c"
+			+ " where c.productid_link = :productid_link "
+			+ " and c.pcontractid_link = :pcontractid_link "
+			+ " and lower(trim(c.balance_name)) = lower(trim(:balance_name))"
+	)
+	List<ProductBalance> findByProductPcontractName(@Param("productid_link") Long productid_link,
+													@Param("pcontractid_link") Long pcontractid_link,
+													@Param("balance_name") String name);
 }

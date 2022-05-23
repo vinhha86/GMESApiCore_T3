@@ -728,7 +728,30 @@ public class ReportAPI {
 			return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
 		}
 	}
+	// download file công đoạn và cum công đonạ
+	@RequestMapping(value = "/download_temp_productsewingcost", method = RequestMethod.POST)
+	public ResponseEntity<download_template_personnel_response> download_temp_productsewingcost(HttpServletRequest request) {
 
+		download_template_personnel_response response = new download_template_personnel_response();
+		try {
+			String FolderPath = "TemplateUpload";
+
+			// Thư mục gốc upload file.
+			String uploadRootPath = request.getServletContext().getRealPath(FolderPath);
+
+			String filePath = uploadRootPath + "/" + "Template_ProductSewingCost_New.xlsx";
+			Path path = Paths.get(filePath);
+			byte[] data = Files.readAllBytes(path);
+			response.data = data;
+			response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
+			response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
+			return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
+			response.setMessage(e.getMessage());
+			return new ResponseEntity<download_template_personnel_response>(response, HttpStatus.OK);
+		}
+	}
 	// download template haiquan
 	@RequestMapping(value = "/download_temp_bom_haiquan", method = RequestMethod.POST)
 	public ResponseEntity<down_temp_bom_response> DownloadBomHaiQuan(HttpServletRequest request,

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,8 +31,12 @@ import vn.gpay.gsmart.core.attribute.IAttributeService;
 import vn.gpay.gsmart.core.attributevalue.Attributevalue;
 import vn.gpay.gsmart.core.attributevalue.IAttributeValueService;
 import vn.gpay.gsmart.core.base.ResponseBase;
+import vn.gpay.gsmart.core.category.ILaborLevelService;
 import vn.gpay.gsmart.core.category.IShipModeService;
+import vn.gpay.gsmart.core.category.LaborLevel;
 import vn.gpay.gsmart.core.category.ShipMode;
+import vn.gpay.gsmart.core.devices_type.Devices_Type;
+import vn.gpay.gsmart.core.devices_type.IDevices_TypeService;
 import vn.gpay.gsmart.core.org.IOrgService;
 import vn.gpay.gsmart.core.org.Org;
 import vn.gpay.gsmart.core.packingtype.IPackingTypeService;
@@ -52,11 +57,18 @@ import vn.gpay.gsmart.core.pcontractproductpairing.IPContractProductPairingServi
 import vn.gpay.gsmart.core.pcontractproductpairing.PContractProductPairing;
 import vn.gpay.gsmart.core.pcontractproductsku.IPContractProductSKUService;
 import vn.gpay.gsmart.core.pcontractproductsku.PContractProductSKU;
+import vn.gpay.gsmart.core.personel.Personel;
 import vn.gpay.gsmart.core.porder.IPOrder_Service;
 import vn.gpay.gsmart.core.porder_req.IPOrder_Req_Service;
 import vn.gpay.gsmart.core.porder_req.POrder_Req;
 import vn.gpay.gsmart.core.product.IProductService;
 import vn.gpay.gsmart.core.product.Product;
+import vn.gpay.gsmart.core.product_balance.IProductBalanceService;
+import vn.gpay.gsmart.core.product_balance.ProductBalance;
+import vn.gpay.gsmart.core.product_balance_process.IProductBalanceProcessService;
+import vn.gpay.gsmart.core.product_balance_process.ProductBalanceProcess;
+import vn.gpay.gsmart.core.product_sewingcost.IProductSewingCostService;
+import vn.gpay.gsmart.core.product_sewingcost.ProductSewingCost;
 import vn.gpay.gsmart.core.productattributevalue.IProductAttributeService;
 import vn.gpay.gsmart.core.productattributevalue.ProductAttributeValue;
 import vn.gpay.gsmart.core.productpairing.IProductPairingService;
@@ -70,15 +82,7 @@ import vn.gpay.gsmart.core.sku.ISKU_AttributeValue_Service;
 import vn.gpay.gsmart.core.sku.ISKU_Service;
 import vn.gpay.gsmart.core.sku.SKU;
 import vn.gpay.gsmart.core.sku.SKU_Attribute_Value;
-import vn.gpay.gsmart.core.utils.AtributeFixValues;
-import vn.gpay.gsmart.core.utils.ColumnPO_FOB;
-import vn.gpay.gsmart.core.utils.ColumnTempNew;
-import vn.gpay.gsmart.core.utils.Common;
-import vn.gpay.gsmart.core.utils.POStatus;
-import vn.gpay.gsmart.core.utils.POType;
-import vn.gpay.gsmart.core.utils.POrderReqStatus;
-import vn.gpay.gsmart.core.utils.ProductType;
-import vn.gpay.gsmart.core.utils.ResponseMessage;
+import vn.gpay.gsmart.core.utils.*;
 
 @RestController
 @RequestMapping("/api/v1/upload")
@@ -106,8 +110,267 @@ public class UploadAPI {
 	@Autowired IAttributeValueService attributevalueService;
 	@Autowired IPContractProductSKUService ppskuService;
 	@Autowired ISizeSetAttributeService sizeset_att_Service;
+	@Autowired IProductSewingCostService productSewingCostService;
+	@Autowired IDevices_TypeService devicesTypeService;
+	@Autowired ILaborLevelService laborLevelService;
+	@Autowired IProductBalanceService productBalanceService;
+	@Autowired IProductBalanceProcessService productBalanceProcessService;
 
-	
+	@RequestMapping(value = "/personnelUploadProductSewingCost", method = RequestMethod.POST)
+	public ResponseEntity<ResponseBase> UploadPersonnelProductSewingCost(HttpServletRequest request,
+															  @RequestParam("file") MultipartFile file, 
+															  @RequestParam("pcontractid_link") long pcontractid_link,
+															  @RequestParam("productid_link") long productid_link) {
+		ResponseBase response = new ResponseBase();
+		String name = "";
+		String mes_err = "";
+		List<ProductSewingCost> productSewingCostList = new ArrayList<ProductSewingCost>();
+		GpayUser user = (GpayUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Long orgrootid_link = user.getRootorgid_link();
+		Long orgid_link = user.getOrgid_link();
+		Date current_time = new Date();
+		try {
+			String FolderPath = "upload/productsewingcost";
+			String uploadRootPath = request.getServletContext().getRealPath(FolderPath);
+			File uploadRootDir = new File(uploadRootPath);
+			if (!uploadRootDir.exists()) {
+				uploadRootDir.mkdirs();
+			}
+			name = file.getOriginalFilename();
+
+			if (name != null && name.length() > 0) {
+				String[] str = name.split("\\.");
+				String extend = str[str.length - 1];
+				name = current_time.getTime() + "." + extend;
+				File serverFile = new File(uploadRootDir.getAbsolutePath() + File.separator + name);
+				BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(serverFile));
+				stream.write(file.getBytes());
+				stream.close();
+
+				// doc file upload
+				XSSFWorkbook workbook = new XSSFWorkbook(serverFile);
+				XSSFSheet sheet = workbook.getSheetAt(0);
+
+				int rowNum = 1;
+				// int colNum = 1;
+
+				Row row = sheet.getRow(rowNum);
+				try {
+					String Stt = "";
+					Stt = commonService.getStringValue(row.getCell(ColumnProductSewingCost.STT)).trim(); // null or "0" return ""
+//					Stt = Stt.equals("0") ? "" : Stt;
+					while (!Stt.equals("")) {
+						Integer ThoiGian = 0;
+						Float DonGia = 0f;
+						Integer SoLuong = 0;
+						Long ThietBi = 0l;
+						Long BacTho = 0l;
+						// Lay du lieu tu o Excel
+						String tenCongDoan = commonService.getStringValue(row.getCell(ColumnProductSewingCost.TenCongDoan)).trim();
+						if (tenCongDoan.equals("")) {
+							mes_err = "Tên công đoạn ở dòng thứ " + (rowNum + 1) + "không hợp lệ";
+							break;
+						}
+						String maCongDoan = commonService.getStringValue(row.getCell(ColumnProductSewingCost.MaCongDoan)).trim();
+						if (maCongDoan.equals("")) {
+							maCongDoan = tenCongDoan;
+						}
+						String cumCongDoan = commonService.getStringValue(row.getCell(ColumnProductSewingCost.CumCongDoan)).trim();
+						String thietBi = commonService.getStringValue(row.getCell(ColumnProductSewingCost.ThietBi)).trim();
+						if (!thietBi.equals("")) {
+							List<Devices_Type> a = devicesTypeService.loadDevicesTypeByName(thietBi); // Tim Id thiet bi theo ten
+							if (a.size() == 0) {
+								Devices_Type newDeviceType = new Devices_Type();
+								newDeviceType.setName(thietBi);
+								ThietBi = (devicesTypeService.save(newDeviceType)).getId();
+							} else {
+								ThietBi = a.get(0).getId();
+							}
+						}
+						String bacTho = commonService.getStringValue(row.getCell(ColumnProductSewingCost.BacTho)).trim();
+						if (!bacTho.equals("")) {
+							List<LaborLevel> a = laborLevelService.findByName(bacTho);
+							if (a.size() == 0) {
+								LaborLevel newLaborLevel = new LaborLevel();
+								newLaborLevel.setName(bacTho);
+								BacTho = (laborLevelService.save(newLaborLevel)).getId();
+							} else {
+								BacTho = a.get(0).getId();
+							}
+						}
+						String thoiGian = commonService.getStringValue(row.getCell(ColumnProductSewingCost.ThoiGian)).trim();
+						if (!thoiGian.equals("")) {
+							ThoiGian = Integer.parseInt(thoiGian);
+						}
+						String chuThich = commonService.getStringValue(row.getCell(ColumnProductSewingCost.ChuThich)).trim();
+						String donGia = commonService.getStringValue(row.getCell(ColumnProductSewingCost.DonGia)).trim();
+						if (!donGia.equals("")) {
+							DonGia = Float.parseFloat(donGia);
+						}
+						String soLuong = commonService.getStringValue(row.getCell(ColumnProductSewingCost.SoLuong)).trim();
+						if (!soLuong.equals("")) {
+							SoLuong = Integer.parseInt(soLuong);
+						}
+
+						List<ProductSewingCost> productSewingCosts = productSewingCostService.findByProductPcontractName(productid_link, pcontractid_link, tenCongDoan);
+						// Them moi Cong Doan
+						if (productSewingCosts.size() == 0) {
+							ProductSewingCost productSewingCost = new ProductSewingCost();
+							productSewingCost.setName(tenCongDoan);
+							productSewingCost.setCode(maCongDoan);
+							productSewingCost.setOrgrootid_link(orgrootid_link);
+							productSewingCost.setProductid_link(productid_link);
+							productSewingCost.setPcontractid_link(pcontractid_link);
+							productSewingCost.setOrgcreatedid_link(user.getOrgid_link());
+							productSewingCost.setUsercreatedid_link(user.getId());
+							if (DonGia != 0) {
+								productSewingCost.setCost(DonGia);
+							}
+							if (SoLuong != 0) {
+								productSewingCost.setAmount(SoLuong);
+							}
+							if (DonGia != 0 && SoLuong != 0) {
+								productSewingCost.setTotalcost(DonGia * SoLuong);
+							}
+							productSewingCost.setDatecreated(current_time);
+							if (ThietBi != 0) {
+								productSewingCost.setDevicerequiredid_link(ThietBi);
+							}
+							if (BacTho != 0) {
+								productSewingCost.setLaborrequiredid_link(BacTho);
+							}
+							if (ThoiGian != 0) {
+								productSewingCost.setTimespent_standard(ThoiGian);
+							}
+							if (chuThich.equals("")) {
+								productSewingCost.setTechcomment(chuThich);
+							}
+
+							if(cumCongDoan.equals("")) {
+								productSewingCostService.save(productSewingCost);
+							} else {
+								List <ProductBalance> productBalances = productBalanceService.getByProduct(productid_link, pcontractid_link);
+								Long id = 0l;
+								boolean exist = false;
+								for(ProductBalance a : productBalances) {
+									if(a.getBalance_name().toLowerCase().trim().equals(cumCongDoan.toLowerCase().trim())) {
+										exist = true;
+										id = a.getId();
+										break;
+									}
+								}
+								ProductBalanceProcess productBalanceProcess = new ProductBalanceProcess();
+								productBalanceProcess.setOrgrootid_link(orgrootid_link);
+								productBalanceProcess.setProductsewingcostid_link(productSewingCostService.save(productSewingCost).getId());
+								if(exist) {
+									productBalanceProcess.setProductbalanceid_link(id);
+								} else {
+									ProductBalance productBalance = new ProductBalance();
+									productBalance.setBalance_name(cumCongDoan);
+									productBalance.setProductid_link(productid_link);
+									productBalance.setPcontractid_link(pcontractid_link);
+									productBalance.setOrgrootid_link(orgrootid_link);
+
+									productBalanceProcess.setProductbalanceid_link(productBalanceService.save(productBalance).getId());
+								}
+								productBalanceProcessService.save(productBalanceProcess);
+							}
+						} else { // Update Cong Doan trong DB
+							List <ProductSewingCost> productSewingCostsInBalance = productSewingCostService.findByProductPcontractNameInBalance(productid_link, pcontractid_link, tenCongDoan);
+							if(productSewingCostsInBalance.size() != 0) {
+							List <ProductBalanceProcess> productBalanceProcess = productBalanceProcessService.getByProductSewingcost(productSewingCostsInBalance.get(0).getId());
+							productSewingCostsInBalance.get(0).setCode(maCongDoan);
+							productSewingCostsInBalance.get(0).setDevicerequiredid_link(ThietBi);
+							productSewingCostsInBalance.get(0).setLaborrequiredid_link(BacTho);
+							productSewingCostsInBalance.get(0).setTimespent_standard(ThoiGian);
+							productSewingCostsInBalance.get(0).setTechcomment(chuThich);
+							productSewingCostsInBalance.get(0).setCost(DonGia);
+							productSewingCostsInBalance.get(0).setAmount(SoLuong);
+							if(DonGia != 0 && SoLuong != 0) {
+								productSewingCostsInBalance.get(0).setTotalcost(DonGia * SoLuong);
+							}
+							productSewingCostService.save(productSewingCostsInBalance.get(0));
+								if (cumCongDoan.equals("")) {
+									productBalanceProcessService.deleteById(productBalanceProcess.get(0).getId());
+								} else {
+									// Moi don hang va san pham, cum cong doan khong the trung nhau
+									List <ProductBalance> productBalances = productBalanceService.findByProductPcontractName(productid_link, pcontractid_link, cumCongDoan);
+									if(productBalances.size() != 0) {
+										productBalanceProcess.get(0).setProductbalanceid_link(productBalances.get(0).getId());
+									} else {
+										ProductBalance newProductBalance = new ProductBalance();
+										newProductBalance.setOrgrootid_link(orgrootid_link);
+										newProductBalance.setBalance_name(cumCongDoan);
+										newProductBalance.setPcontractid_link(pcontractid_link);
+										newProductBalance.setProductid_link(productid_link);
+										productBalanceProcess.get(0).setProductbalanceid_link(productBalanceService.save(newProductBalance).getId());
+									}
+									productBalanceProcessService.save(productBalanceProcess.get(0));
+								}
+							} else {
+								// Voi moi don hang va san pham, chi co 1 ten cong doan khong nam trong cum cong doan.
+								List <ProductSewingCost> productSewingCostsOutBalance = productSewingCostService.findByProductPcontractNameOutBalance(productid_link, pcontractid_link, tenCongDoan);
+								productSewingCostsOutBalance.get(0).setCode(maCongDoan);
+								productSewingCostsOutBalance.get(0).setDevicerequiredid_link(ThietBi);
+								productSewingCostsOutBalance.get(0).setLaborrequiredid_link(BacTho);
+								productSewingCostsOutBalance.get(0).setTimespent_standard(ThoiGian);
+								productSewingCostsOutBalance.get(0).setTechcomment(chuThich);
+								productSewingCostsOutBalance.get(0).setCost(DonGia);
+								productSewingCostsOutBalance.get(0).setAmount(SoLuong);
+								if(DonGia != 0 && SoLuong != 0) {
+									productSewingCostsOutBalance.get(0).setTotalcost(DonGia * SoLuong);
+								}
+								productSewingCostService.save(productSewingCostsOutBalance.get(0));
+								if(!cumCongDoan.equals("")) {
+									// Voi moi don hang va san pham, cum cong doan khong duoc trung
+									List <ProductBalance> productBalances = productBalanceService.findByProductPcontractName(productid_link, pcontractid_link, cumCongDoan);
+									ProductBalanceProcess newProductBalanceProcess = new ProductBalanceProcess();
+									newProductBalanceProcess.setProductsewingcostid_link(productSewingCostsOutBalance.get(0).getId());
+									if(productBalances.size() != 0) {
+										newProductBalanceProcess.setProductbalanceid_link(productBalances.get(0).getId());
+									} else {
+										ProductBalance newProductBalance = new ProductBalance();
+										newProductBalance.setOrgrootid_link(orgrootid_link);
+										newProductBalance.setBalance_name(cumCongDoan);
+										newProductBalance.setProductid_link(productid_link);
+										newProductBalance.setPcontractid_link(pcontractid_link);
+
+										newProductBalanceProcess.setProductbalanceid_link(productBalanceService.save(newProductBalance).getId());
+									}
+									productBalanceProcessService.save(newProductBalanceProcess);
+								}
+							}
+						}
+					rowNum++;
+					row = sheet.getRow(rowNum);
+					if (row == null)
+						break;
+					Stt = commonService.getStringValue(row.getCell(ColumnProductSewingCost.STT)).trim();
+					Stt = Stt.equals("0") ? "" : Stt;
+					}
+				} catch(Exception e){
+					e.printStackTrace();
+					mes_err = "Có lỗi ở dòng " + (rowNum + 1) + " " + mes_err;
+				} finally{
+					workbook.close();
+					serverFile.delete();
+				}
+				// neu co loi
+				if (mes_err == "") {
+					response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
+					response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
+				} else {
+					response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
+					response.setMessage(mes_err);
+				}
+			}
+		} catch(Exception e){
+			response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
+			response.setMessage(e.getMessage());
+		}
+
+		return new ResponseEntity<ResponseBase>(response, HttpStatus.OK);
+	}
 	//upload chao gia
 	@RequestMapping(value = "/offers", method = RequestMethod.POST)
 	public ResponseEntity<ResponseBase> UploadTemplate(HttpServletRequest request,

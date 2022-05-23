@@ -32,22 +32,22 @@ public class ProductSewingCost implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_sewingcost_generator")
 	@SequenceGenerator(name="product_sewingcost_generator", sequenceName = "product_sewingcost_id_seq", allocationSize=1)
 	private Long id;
-	private Long orgrootid_link;
+	private Long orgrootid_link; //phan xuong
 	private Long productid_link;
-	private Long workingprocessid_link;
-	private Float cost;
-	private Integer amount;
-	private Float totalcost;
-	private Long usercreatedid_link;
-	private Date datecreated;
-	private Integer timespent_standard;
+	private Long workingprocessid_link; //
+	private Float cost; // don gia
+	private Integer amount; // so luong
+	private Float totalcost; // tong gia = don gia * so luong
+	private Long usercreatedid_link; // id cua user
+	private Date datecreated; // ngay tao cong doan
+	private Integer timespent_standard; // thoi gian
 	private Long devicerequiredid_link;
 	private Long laborrequiredid_link;
-	private String techcomment;
-	private String name;
-	private String code;
+	private String techcomment; // chu thich
+	private String name; //ten cong doan
+	private String code; //ma cong doan
 	private Long pcontractid_link;
-	private Long orgcreatedid_link;
+	private Long orgcreatedid_link; // bo phan cua user
 	
 	@NotFound(action = NotFoundAction.IGNORE)
 	@ManyToOne

@@ -33,4 +33,9 @@ public class ProductBalanceService extends AbstractService<ProductBalance> imple
 		return repo.getByBalanceName_Product(balance_name, productid_link, pcontractid_link);
 	}
 
+	@Override
+	public List<ProductBalance> findByProductPcontractName(Long productid_link, Long pcontractid_link, String cumcongdoan) {
+		return repo.findByProductPcontractName(productid_link, pcontractid_link, cumcongdoan);
+	}
+
 }

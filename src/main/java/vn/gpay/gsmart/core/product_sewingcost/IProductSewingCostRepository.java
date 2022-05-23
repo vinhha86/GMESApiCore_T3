@@ -6,8 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import vn.gpay.gsmart.core.cutplan.CutPlan_Row;
+import vn.gpay.gsmart.core.product.Product;
 
 @Repository
 @Transactional
@@ -54,4 +57,34 @@ public interface IProductSewingCostRepository extends JpaRepository<ProductSewin
 			@Param("productid_link") final Long productid_link,
 			@Param("pcontractid_link") final Long pcontractid_link
 			);
+
+	@Query(value = "select c from ProductSewingCost c"
+			+ " where (c.productid_link = :productid_link)"
+			+ " and (c.pcontractid_link = :pcontractid_link)"
+			+ " and lower(trim(c.name)) = lower(trim(:name)) "
+	        )
+	List<ProductSewingCost> findByProductPcontractName(@Param("productid_link") Long productid_link,
+														 @Param("pcontractid_link") Long pcontractid_link,
+														 @Param("name") String name);
+
+	@Query(value = "select c from ProductSewingCost c"
+			+ " inner join ProductBalanceProcess a on a.productsewingcostid_link = c.id "
+			+ " where (c.productid_link = :productid_link) "
+			+ " and c.pcontractid_link = :pcontractid_link "
+			+ " and lower(trim(c.name)) = lower(trim(:name)) "
+	)
+	List <ProductSewingCost> findByProductPcontractNameInBalance(@Param("productid_link") Long productid_link,
+											   @Param("pcontractid_link") Long pcontractid_link,
+											   @Param("name") String name);
+
+	@Query(value = "select c from ProductSewingCost c"
+			+ " left join ProductBalanceProcess a on a.productsewingcostid_link = c.id "
+			+ " where c.productid_link = :productid_link "
+			+ " and c.pcontractid_link = :pcontractid_link "
+			+ " and lower(trim(c.name)) = lower(trim(:name)) "
+			+ " and a.id is NULL "
+	)
+	List<ProductSewingCost> findByProductPcontractNameOutBalance(@Param("productid_link") Long productid_link,
+																 @Param("pcontractid_link") Long pcontractid_link,
+																 @Param("name") String name);
 }
