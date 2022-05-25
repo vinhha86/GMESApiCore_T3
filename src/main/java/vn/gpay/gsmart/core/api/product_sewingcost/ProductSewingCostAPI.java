@@ -121,7 +121,7 @@ public class ProductSewingCostAPI {
 			List<ProductSewingCost> productSewingCostRequestList = entity.data;
 			for(ProductSewingCost productSewingCost : productSewingCostRequestList) {
 				String name = productSewingCost.getName();
-				List<ProductSewingCost> exist = productSewingCostService.findByProductPcontractNameOutBalance(productid_link, pcontractid_link, name);
+				List<ProductSewingCost> exist = productSewingCostService.findByProductPcontractName(productid_link, pcontractid_link, name);
 				if(exist.size() != 0) {
 					response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
 					response.setMessage("Ten da bi trung, vui long chon ten khac");

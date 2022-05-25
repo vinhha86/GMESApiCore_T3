@@ -171,10 +171,6 @@ public class UploadAPI {
 							mes_err = "Tên công đoạn ở dòng thứ " + (rowNum + 1) + "không hợp lệ";
 							break;
 						}
-						String maCongDoan = commonService.getStringValue(row.getCell(ColumnProductSewingCost.MaCongDoan)).trim();
-						if (maCongDoan.equals("")) {
-							maCongDoan = tenCongDoan;
-						}
 						String cumCongDoan = commonService.getStringValue(row.getCell(ColumnProductSewingCost.CumCongDoan)).trim();
 						String thietBi = commonService.getStringValue(row.getCell(ColumnProductSewingCost.ThietBi)).trim();
 						if (!thietBi.equals("")) {
@@ -182,6 +178,8 @@ public class UploadAPI {
 							if (a.size() == 0) {
 								Devices_Type newDeviceType = new Devices_Type();
 								newDeviceType.setName(thietBi);
+								newDeviceType.setCode(thietBi);
+								newDeviceType.setIs_rfid(false);
 								ThietBi = (devicesTypeService.save(newDeviceType)).getId();
 							} else {
 								ThietBi = a.get(0).getId();
@@ -193,6 +191,8 @@ public class UploadAPI {
 							if (a.size() == 0) {
 								LaborLevel newLaborLevel = new LaborLevel();
 								newLaborLevel.setName(bacTho);
+								newLaborLevel.setCode(bacTho);
+								newLaborLevel.setOrgrootid_link(orgrootid_link);
 								BacTho = (laborLevelService.save(newLaborLevel)).getId();
 							} else {
 								BacTho = a.get(0).getId();
@@ -217,7 +217,7 @@ public class UploadAPI {
 						if (productSewingCosts.size() == 0) {
 							ProductSewingCost productSewingCost = new ProductSewingCost();
 							productSewingCost.setName(tenCongDoan);
-							productSewingCost.setCode(maCongDoan);
+							productSewingCost.setCode(tenCongDoan);
 							productSewingCost.setOrgrootid_link(orgrootid_link);
 							productSewingCost.setProductid_link(productid_link);
 							productSewingCost.setPcontractid_link(pcontractid_link);
@@ -279,7 +279,7 @@ public class UploadAPI {
 							List <ProductSewingCost> productSewingCostsInBalance = productSewingCostService.findByProductPcontractNameInBalance(productid_link, pcontractid_link, tenCongDoan);
 							if(productSewingCostsInBalance.size() != 0) {
 							List <ProductBalanceProcess> productBalanceProcess = productBalanceProcessService.getByProductSewingcost(productSewingCostsInBalance.get(0).getId());
-							productSewingCostsInBalance.get(0).setCode(maCongDoan);
+							productSewingCostsInBalance.get(0).setCode(tenCongDoan);
 							productSewingCostsInBalance.get(0).setDevicerequiredid_link(ThietBi);
 							productSewingCostsInBalance.get(0).setLaborrequiredid_link(BacTho);
 							productSewingCostsInBalance.get(0).setTimespent_standard(ThoiGian);
@@ -310,7 +310,7 @@ public class UploadAPI {
 							} else {
 								// Voi moi don hang va san pham, chi co 1 ten cong doan khong nam trong cum cong doan.
 								List <ProductSewingCost> productSewingCostsOutBalance = productSewingCostService.findByProductPcontractNameOutBalance(productid_link, pcontractid_link, tenCongDoan);
-								productSewingCostsOutBalance.get(0).setCode(maCongDoan);
+								productSewingCostsOutBalance.get(0).setCode(tenCongDoan);
 								productSewingCostsOutBalance.get(0).setDevicerequiredid_link(ThietBi);
 								productSewingCostsOutBalance.get(0).setLaborrequiredid_link(BacTho);
 								productSewingCostsOutBalance.get(0).setTimespent_standard(ThoiGian);
