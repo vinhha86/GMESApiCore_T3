@@ -3144,55 +3144,58 @@ public class PContract_POAPI {
 	}
 
 	@RequestMapping(value = "/getPOLine_Confirm_ByMonthYear", method = RequestMethod.POST)
-	public ResponseEntity<PContract_getbycontractproduct_response> getPOLine_Confirm_ByMonthYear(
+	public ResponseEntity<PContract_getbymonthyear_response> getPOLine_Confirm_ByMonthYear(
 			@RequestBody PContract_getbysearch_request entity, HttpServletRequest request) {
-		PContract_getbycontractproduct_response response = new PContract_getbycontractproduct_response();
+		PContract_getbymonthyear_response response = new PContract_getbymonthyear_response();
 		try {
-			System.out.println("zoooooo");
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			Date firstDay = sdf.parse(entity.firstDayOfMonth_shipDate);
 			Date lastDay = sdf.parse(entity.lastDayOfMonth_shipDate);
-			List<PContract_PO> listPContractPO = pcontract_POService
+			List<PContract_PO_NoLink> listPContractPO = pcontract_PO_NoLink_Service
 					.get_by_month_year(firstDay,lastDay, POType.PO_LINE_CONFIRMED);
 
 			// Update danh sach to chuyen duoc giao sx cho PO Line
-			for (PContract_PO thePoline : listPContractPO) {
-				thePoline.setProductionlines(grantskuService.getProductionLines(thePoline.getId()));
-
-				// set phuong thuc dong goi
-				String packingnotice = thePoline.getPackingnotice();
-				if(packingnotice == null || packingnotice.equals("null") || packingnotice.equals("")) {
-					thePoline.setPhuongThucDongGoi("");
-				}else {
-					String phuongThucDongGoi = "";
-					String[] listStr = packingnotice.split(";");
-					for(Integer i=0; i<listStr.length;i++) {
-						if(!listStr[i].equals("")) {
-							Long packingTypeId = Long.parseLong(listStr[i]);
-							PackingType packingType = packingService.findOne(packingTypeId);
-							String packingTypeCode = packingType.getCode();
-//							String packingTypeName = packingType.getName();
-							if(phuongThucDongGoi.equals("")) {
-								phuongThucDongGoi+= packingTypeCode;
-							}else {
-								phuongThucDongGoi+= "; " + packingTypeCode;
-							}
-						}
-					}
-					thePoline.setPhuongThucDongGoi(phuongThucDongGoi);
-				}
-			}
+//			for (PContract_PO_NoLink thePoline : listPContractPO) {
+//				//
+////				Long pcontractid_link = thePoline.getPcontractid_link();
+////				String pcontract_code =  pcontract
+//				//
+//				thePoline.setProductionlines(grantskuService.getProductionLines(thePoline.getId()));
+//
+//				// set phuong thuc dong goi
+//				String packingnotice = thePoline.getPackingnotice();
+//				if(packingnotice == null || packingnotice.equals("null") || packingnotice.equals("")) {
+//					thePoline.setPhuongThucDongGoi("");
+//				}else {
+//					String phuongThucDongGoi = "";
+//					String[] listStr = packingnotice.split(";");
+//					for(Integer i=0; i<listStr.length;i++) {
+//						if(!listStr[i].equals("")) {
+//							Long packingTypeId = Long.parseLong(listStr[i]);
+//							PackingType packingType = packingService.findOne(packingTypeId);
+//							String packingTypeCode = packingType.getCode();
+////							String packingTypeName = packingType.getName();
+//							if(phuongThucDongGoi.equals("")) {
+//								phuongThucDongGoi+= packingTypeCode;
+//							}else {
+//								phuongThucDongGoi+= "; " + packingTypeCode;
+//							}
+//						}
+//					}
+//					thePoline.setPhuongThucDongGoi(phuongThucDongGoi);
+//				}
+//			}
 
 			response.data = listPContractPO;
 
 			response.setRespcode(ResponseMessage.KEY_RC_SUCCESS);
 			response.setMessage(ResponseMessage.getMessage(ResponseMessage.KEY_RC_SUCCESS));
-			return new ResponseEntity<PContract_getbycontractproduct_response>(response, HttpStatus.OK);
+			return new ResponseEntity<PContract_getbymonthyear_response>(response, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			response.setRespcode(ResponseMessage.KEY_RC_EXCEPTION);
 			response.setMessage(e.getMessage());
-			return new ResponseEntity<PContract_getbycontractproduct_response>(response, HttpStatus.OK);
+			return new ResponseEntity<PContract_getbymonthyear_response>(response, HttpStatus.OK);
 		}
 	}
 

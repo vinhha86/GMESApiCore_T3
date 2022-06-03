@@ -27,4 +27,9 @@ public class PContract_PO_NoLink_Service extends AbstractService<PContract_PO_No
 //		System.out.println(shipdate_to);
 		return repo.getPO_HavetoShip(orgrootid_link, shipdate_from, shipdate_to, orgbuyerid_link);
 	}
+
+	@Override
+	public List<PContract_PO_NoLink> get_by_month_year(Date shipdate_from, Date shipdate_to, Integer po_typeid_link) {
+		return repo.getby_month_year(shipdate_from, shipdate_to,po_typeid_link);
+	}
 }

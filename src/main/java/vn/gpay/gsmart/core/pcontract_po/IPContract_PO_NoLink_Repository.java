@@ -28,4 +28,13 @@ public interface IPContract_PO_NoLink_Repository
 			@Param("shipdate_to") final Date shipdate_to,
 			@Param("orgbuyerid_link") final Long orgbuyerid_link
 			);
+	@Query(value = "select c from PContract_PO_NoLink c "
+			+ "where (c.shipdate >= :shipdate_from) "
+			+ "and c.shipdate <= :shipdate_to "
+			+ "and c.po_typeid_link = :po_typeid_link")
+	public List<PContract_PO_NoLink> getby_month_year(
+			@Param("shipdate_from") final Date shipdate_from,
+			@Param("shipdate_to") final Date shipdate_to,
+			@Param("po_typeid_link") final Integer po_typeid_link
+	);
 }

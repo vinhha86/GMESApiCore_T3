@@ -8,4 +8,8 @@ import vn.gpay.gsmart.core.base.Operations;
 public interface IPContract_PO_NoLink_Service extends Operations<PContract_PO_NoLink> {
 
 	List<PContract_PO_NoLink> getPO_HavetoShip(Long orgrootid_link, Date shipdate_from, Date shipdate_to, Long orgbuyerid_link);
-}
+	List<PContract_PO_NoLink> get_by_month_year(Date shipdate_from, Date shipdate_to, Integer po_typeid_link);
+};
+
+
+
