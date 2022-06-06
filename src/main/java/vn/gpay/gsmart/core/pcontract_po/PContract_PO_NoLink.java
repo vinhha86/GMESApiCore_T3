@@ -16,6 +16,7 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
+import vn.gpay.gsmart.core.pcontract.PContract;
 import vn.gpay.gsmart.core.product.Product;
 
 @Table(name = "pcontract_po")
@@ -84,6 +85,8 @@ public class PContract_PO_NoLink implements Serializable {
 	private int po_quantity_sp;
 	@Transient
 	private int totalpair;
+//	@Transient
+//	private String contractcode;
 
 	public Integer getPo_typeid_link() {
 		return po_typeid_link;
@@ -135,6 +138,19 @@ public class PContract_PO_NoLink implements Serializable {
 	@JoinColumn(name = "productid_link", insertable = false, updatable = false)
 	private Product product;
 
+	@NotFound(action = NotFoundAction.IGNORE)
+	@ManyToOne
+	@JoinColumn(name = "pcontractid_link", insertable = false, updatable = false)
+	private PContract pcontract;
+
+
+	@Transient
+	public String getContractcode() {
+		if (pcontract != null)
+			return pcontract.getContractcode();
+		return "";
+	}
+
 	@Transient
 	public int getProduct_typeid_link() {
 		if (product != null) {
@@ -168,6 +184,8 @@ public class PContract_PO_NoLink implements Serializable {
 		}
 		return "";
 	}
+	@Transient
+	private String phuongThucDongGoi;
 
 
 	public Long getId() {
@@ -552,5 +570,20 @@ public class PContract_PO_NoLink implements Serializable {
 
 	public void setTotalpair(int totalpair) {
 		this.totalpair = totalpair;
+	}
+
+//	public String getContractcode() {
+//		return contractcode;
+//	}
+//
+//	public void setContractcode(String contractcode) {
+//		this.contractcode = contractcode;
+//	}
+	public String getPhuongThucDongGoi() {
+		return phuongThucDongGoi;
+	}
+
+	public void setPhuongThucDongGoi(String phuongThucDongGoi) {
+		this.phuongThucDongGoi = phuongThucDongGoi;
 	}
 }

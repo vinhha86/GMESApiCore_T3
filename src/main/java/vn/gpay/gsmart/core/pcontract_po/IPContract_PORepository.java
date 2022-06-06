@@ -83,7 +83,18 @@ public interface IPContract_PORepository
 			@Param("shipdate_from") final Date shipdate_from,
 			@Param("shipdate_to") final Date shipdate_to
 			);
-	
+
+	@Query(value = "select c from PContract_PO c "
+			+ "where (c.shipdate >= :shipdate_from) "
+			+ "and c.shipdate <= :shipdate_to "
+			+ "and c.po_typeid_link = :po_typeid_link")
+	public List<PContract_PO> getby_month_year(
+			@Param("shipdate_from") final Date shipdate_from,
+			@Param("shipdate_to") final Date shipdate_to,
+			@Param("po_typeid_link") final Integer po_typeid_link
+	);
+
+
 	@Query(value = "select distinct c from PContract_PO c " 
 			+ "inner join PContract_PO d on d.id = c.parentpoid_link "
 			+ "where d.pcontractid_link = :pcontractid_link " 

@@ -419,7 +419,12 @@ public class PContract_POService extends AbstractService<PContract_PO> implement
             Long mausanphamid_link, Date shipdate_from, Date shipdate_to){
         return repo.getby_parent_and_type_and_mausp_and_shipdate(pcontractpo_parentid_link, mausanphamid_link, po_typeid_link, shipdate_from, shipdate_to);
     }
-	
+
+	@Override
+	public List<PContract_PO> get_by_month_year(Date shipdate_from, Date shipdate_to, Integer po_typeid_link) {
+		return repo.getby_month_year(shipdate_from, shipdate_to,po_typeid_link);
+	}
+
 	@Override
 	public Integer getSumPoQuantity_by_parent_and_type_and_mausp(Long pcontractpo_parentid_link, int po_typeid_link,
 			Long mausanphamid_link) {
