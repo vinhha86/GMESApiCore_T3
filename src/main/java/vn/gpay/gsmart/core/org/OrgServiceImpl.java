@@ -416,4 +416,9 @@ public class OrgServiceImpl extends AbstractService<Org> implements IOrgService{
 	public List<Org> getOrgByNameOrCode(String name, Integer orgtypeid_link) {
 		return repositoty.getOrgByNameOrCode(name, orgtypeid_link);
 	}
+
+	@Override
+	public List<Org> getOrgByParentAndType(List<Long> parentid_linkList, List<Integer> orgtypeid_linkList) {
+		return repositoty.getOrgByParentAndType(parentid_linkList, orgtypeid_linkList);
+	}
 }

@@ -76,4 +76,5 @@ public interface IOrgService extends Operations<Org>{
 	public List<Org>findOrgByType_Id_ParentId_Org_grant_IdForMenuOrg(Long org_id,Long Org_grant_id_link);
 	
 	List<Org> getOrgByNameOrCode(String name, Integer orgtypeid_link);
+	List<Org> getOrgByParentAndType(List<Long> parentid_linkList,List<Integer> orgtypeid_linkList);
 }

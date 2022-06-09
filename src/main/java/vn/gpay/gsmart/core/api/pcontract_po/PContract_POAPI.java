@@ -2012,6 +2012,14 @@ public class PContract_POAPI {
 			long usercreatedid_link = user.getId();
 
 			PContract_PO pcontract_po = entity.data;
+			if(pcontract_po.getParentpoid_link() == null){
+				List<PContract_PO> listPContractPO = pcontract_POService
+						.get_by_parent_and_type(pcontract_po.getId(), POType.PO_LINE_CONFIRMED);
+				for(PContract_PO pContract_po_child : listPContractPO){
+					if(!pContract_po_child.getIsmap()) pContract_po_child.setOrggrantid_link(
+							pcontract_po.getOrggrantid_link());
+				}
+			}
 			if (pcontract_po.getId() == null || pcontract_po.getId() == 0) {
 				pcontract_po.setUsercreatedid_link(usercreatedid_link);
 				pcontract_po.setDatecreated(new Date());

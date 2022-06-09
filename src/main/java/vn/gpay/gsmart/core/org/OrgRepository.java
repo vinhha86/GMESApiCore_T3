@@ -196,4 +196,17 @@ public interface OrgRepository extends JpaRepository<Org, Long>,JpaSpecification
 			@Param ("name")final String name,
 			@Param ("orgtypeid_link")final Integer orgtypeid_link
 			);
+
+	@Query(value = "select c from Org c "
+			+ " inner join Org d on c.parentid_link = d.id "
+			+ " where c.parentid_link in :parentid_linkList "
+			+ " and c.orgtypeid_link in :orgtypeid_linkList "
+			+ " and c.status = 1 "
+			+ " and d.status = 1 "
+			+ " order by c.orgtypeid_link asc, c.id asc "
+	)
+	public List<Org> getOrgByParentAndType(
+			@Param ("parentid_linkList")final List<Long> parentid_linkList,
+			@Param ("orgtypeid_linkList")final List<Integer> orgtypeid_linkList
+	);
 }

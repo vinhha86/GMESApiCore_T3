@@ -57,6 +57,7 @@ public interface IPContract_POService extends Operations<PContract_PO> {
 
 	List<PContract_PO> get_by_parent_and_type_and_MauSP(Long pcontractpo_parentid_link, int po_typeid_link,
 			Long mausanphamid_link);
+
 	
     List<PContract_PO> get_by_parent_and_type_and_MauSP_and_Shipdate(Long pcontractpo_parentid_link, int po_typeid_link,
             Long mausanphamid_link, Date shipdate_from, Date shipdate_to);
